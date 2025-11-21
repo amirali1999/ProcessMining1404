@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}ورود{% endblock %}
+{% block content %}
+<section class="auth">
+  <div class="card auth-card">
+    <h2 class="card-title">ورود</h2>
+    <form method="post" class="form">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="alert error">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="form-group">
+        <label for="id_username">نام کاربری</label>
+        {{ form.username }}
+        {% if form.username.errors %}<small class="field-error">{{ form.username.errors|striptags }}</small>{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="id_password">رمز عبور</label>
+        <div class="password-field">
+          {{ form.password }}
+          <button type="button" class="btn-text toggle-password" aria-label="نمایش/مخفی کردن" data-target="id_password">👁️</button>
+        </div>
+        {% if form.password.errors %}<small class="field-error">{{ form.password.errors|striptags }}</small>{% endif %}
+      </div>
+
+      <button class="btn btn-primary btn-block" type="submit">ورود</button>
+    </form>
+    <p class="muted">حساب ندارید؟ <a href="{% url 'register' %}">ثبت‌نام</a></p>
+    <p class="muted"><a href="/admin">پنل ادمین Django</a></p>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('.toggle-password');
+    if(!btn) return;
+    const id = btn.getAttribute('data-target');
+    const input = document.getElementById(id);
+    if(!input) return;
+    input.type = input.type === 'password' ? 'text' : 'password';
+  });
+  // Add basic placeholders when possible
+  const u = document.getElementById('id_username'); if(u) u.placeholder='نام کاربری';
+  const p = document.getElementById('id_password'); if(p) p.placeholder='رمز عبور';
+</script>
+{% endblock %}

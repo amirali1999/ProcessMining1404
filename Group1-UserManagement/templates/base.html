@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}مدیریت کاربران{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  {% load static %}
+  <!-- Web Fonts: Persian (Vazirmatn) and English (Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Vazirmatn:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="navbar container">
+      <div class="brand"><a class="latin" href="{% url 'dashboard' %}">Process Mining Project</a></div>
+      <div class="nav-links">
+        <a href="{% url 'dashboard' %}">داشبورد</a>
+        {% if user.is_authenticated %}
+          {% if user.is_admin %}<a href="{% url 'admin_only' %}">صفحه ادمین</a>{% endif %}
+          <a href="{% url 'logout' %}">خروج</a>
+        {% else %}
+          <a href="{% url 'login' %}">ورود</a>
+          <a class="btn btn-sm" href="{% url 'register' %}">ثبت‌نام</a>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    {% if messages %}
+      <ul class="messages">
+        {% for m in messages %}
+          <li class="message {{ m.tags }}">{{ m }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <small>Process Mining Project - Ferdowsi University of Mashhad</small>
+  </footer>
+</body>
+</html>

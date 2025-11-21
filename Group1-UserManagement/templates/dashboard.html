@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}داشبورد{% endblock %}
+{% block content %}
+  <h2>سلام {% if user.is_authenticated %}{{ user.username }}{% else %}میهمان{% endif %}</h2>
+  <p>نقش‌ها: {% if user.is_authenticated %}{% for r in user.roles.all %}{{ r.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}-{% endif %}</p>
+
+  {% if user.is_authenticated %}
+  <div class="dashboard-grid">
+    {% if user.is_admin or user.is_analyst %}
+    <a class="card" href="{% url 'uploads_list' %}" style="text-decoration:none;border:1px solid var(--border);border-radius:.8rem;padding:1rem;background:rgba(17,24,39,.7)">
+      <h3 class="hov" style="margin:.2rem 0 0 0">مدیریت فایل‌ها</h3>
+      <p class="muted">آپلود، مشاهده و دانلود فایل‌ها</p>
+      <div class="muted">میانبر: /uploads/</div>
+    </a>
+    {% endif %}
+
+  {% if user.is_admin %}
+  <a class="card" href="/admin/" style="text-decoration:none;padding:1rem;background:rgba(17,24,39,.7)">
+      <h3 class="hov" style="margin:.2rem 0 0 0">پنل مدیریت</h3>
+      <p class="muted">مدیریت کاربران و نقش‌ها</p>
+      <div class="muted">میانبر: /admin/</div>
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+{% endblock %}
