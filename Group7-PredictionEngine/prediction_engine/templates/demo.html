@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Process Mining Prediction Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding-top: 20px; background-color: #f8f9fa; }
+        .card { margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .prediction-result { display: none; }
+        .loading { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="pb-3 mb-4 border-bottom">
+            <a href="/" class="d-flex align-items-center text-dark text-decoration-none">
+                <span class="fs-4">Process Mining Prediction Engine</span>
+            </a>
+        </header>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Input Case Data</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Test Cases:</label>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button class="btn btn-sm btn-outline-primary test-case-btn" data-seq="NEW, CODE OK, MANUAL" title="Happy Path">Happy Path</button>
+                                <button class="btn btn-sm btn-outline-primary test-case-btn" data-seq="NEW" title="Short Sequence">Short</button>
+                                <button class="btn btn-sm btn-outline-primary test-case-btn" data-seq="NEW, SUPER_WEIRD_ACTIVITY, MANUAL" title="Unknown Activity">Unknown Act</button>
+                                <button class="btn btn-sm btn-outline-primary test-case-btn" data-seq="" title="Empty Sequence">Empty</button>
+                                <button class="btn btn-sm btn-outline-primary test-case-btn" data-seq="NEW, CODE OK, MANUAL, BILLED, STORNO, REJECTED, NEW, CODE OK" title="Long Sequence">Long</button>
+                            </div>
+                        </div>
+                        <hr>
+                        <form id="predictionForm">
+                            <div class="mb-3">
+                                <label for="caseId" class="form-label">Case ID (Optional - for lookup)</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="caseId" placeholder="e.g. A">
+                                    <button class="btn btn-outline-secondary" type="button" id="lookupBtn">Lookup</button>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="activities" class="form-label">Activity Sequence (comma separated)</label>
+                                <textarea class="form-control" id="activities" rows="3" placeholder="NEW, CHANGE DIAGN, ..."></textarea>
+                                <div class="form-text">Enter the sequence of activities that have occurred so far.</div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100">Predict Next Steps</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center loading" id="loadingSpinner">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Running AI Models...</p>
+                        </div>
+
+                        <div id="resultsArea" class="prediction-result">
+                            <!-- Suggestion Section -->
+                            <div class="p-3 mb-3 suggestion-box rounded" style="border-left: 5px solid #0d6efd; background-color: #e7f1ff;">
+                                <h5 class="text-primary">Suggestion (Next Best Action)</h5>
+                                <h3 id="nextActivity" class="fw-bold"></h3>
+                                <small class="text-muted">Based on historical patterns</small>
+                            </div>
+
+                            <!-- Prediction Section -->
+                            <div class="p-3 prediction-box rounded" style="border-left: 5px solid #198754; background-color: #d1e7dd;">
+                                <h5 class="text-success">Predictions (Future Outcome)</h5>
+                                
+                                <div class="row mt-3">
+                                    <div class="col-6">
+                                        <h6>Remaining Time</h6>
+                                        <p class="fs-5" id="remainingTime">-</p>
+                                        <small class="text-muted" id="completionDate"></small>
+                                    </div>
+                                    <div class="col-6">
+                                        <h6>Final Outcome</h6>
+                                        <p class="fs-5" id="outcome">-</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="emptyState" class="text-center text-muted py-5">
+                            <p>Enter case data and click Predict to see results.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test Case Buttons
+        document.querySelectorAll('.test-case-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('activities').value = btn.dataset.seq;
+                document.getElementById('caseId').value = '';
+            });
+        });
+
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const caseId = document.getElementById('caseId').value.trim();
+            const activitiesStr = document.getElementById('activities').value.trim();
+            
+            if (!caseId && !activitiesStr) {
+                alert('Please enter a Case ID or Activity Sequence');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('resultsArea').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'none';
+
+            try {
+                const payload = {};
+                if (caseId) payload.case_id = caseId;
+                // Allow empty activities for "Empty Sequence" test case
+                if (activitiesStr !== "") {
+                    payload.activities = activitiesStr.split(',').map(s => s.trim()).filter(s => s !== "");
+                } else {
+                    payload.activities = [];
+                }
+
+                const response = await fetch('/prediction/api/predict/all/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Update Suggestion
+                    if (data.suggestion && data.suggestion.next_activity) {
+                        document.getElementById('nextActivity').textContent = data.suggestion.next_activity;
+                    } else {
+                        document.getElementById('nextActivity').textContent = 'N/A';
+                    }
+
+                    // Update Prediction
+                    if (data.prediction) {
+                        // Remaining Time
+                        if (data.prediction.remaining_time) {
+                            const days = data.prediction.remaining_time.days.toFixed(1);
+                            document.getElementById('remainingTime').textContent = `${days} days`;
+                        } else {
+                            document.getElementById('remainingTime').textContent = 'N/A';
+                        }
+
+                        // Outcome
+                        if (data.prediction.outcome) {
+                            document.getElementById('outcome').textContent = data.prediction.outcome;
+                        } else if (data.prediction.predicted_outcome) {
+                             document.getElementById('outcome').textContent = data.prediction.predicted_outcome;
+                        } else {
+                            document.getElementById('outcome').textContent = 'N/A';
+                        }
+                    }
+
+                    document.getElementById('resultsArea').style.display = 'block';
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                    document.getElementById('emptyState').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while fetching predictions');
+                document.getElementById('emptyState').style.display = 'block';
+            } finally {
+                document.getElementById('loadingSpinner').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
