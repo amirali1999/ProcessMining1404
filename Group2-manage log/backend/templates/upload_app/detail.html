@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}جزئیات فایل{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">📄 جزئیات فایل</h4>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th width="25%">شناسه (ID):</th>
+                        <td><code>{{ event_log.id }}</code></td>
+                    </tr>
+                    <tr>
+                        <th>نام فایل اصلی:</th>
+                        <td>{{ event_log.original_filename }}</td>
+                    </tr>
+                    <tr>
+                        <th>حجم فایل:</th>
+                        <td>
+                            <span class="badge bg-info">
+                                {{ event_log.get_file_size_mb }} MB
+                            </span>
+                            <small class="text-muted">({{ event_log.file_size|filesizeformat }})</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>زمان آپلود:</th>
+                        <td>{{ event_log.uploaded_at|date:"Y/m/d H:i:s" }}</td>
+                    </tr>
+                    <tr>
+                        <th>مسیر ذخیره در MinIO:</th>
+                        <td><code>{{ event_log.file.name }}</code></td>
+                    </tr>
+                    <tr>
+                        <th>URL دسترسی:</th>
+                        <td>
+                            <code>{{ event_log.file.url }}</code>
+                        </td>
+                    </tr>
+                    {% if event_log.uploaded_by %}
+                    <tr>
+                        <th>آپلودشده توسط:</th>
+                        <td>{{ event_log.uploaded_by.username }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+                
+                <div class="d-grid gap-2 mt-3">
+                    <a href="{% url 'upload_app:list' %}" class="btn btn-secondary">
+                        ↩️ بازگشت به لیست
+                    </a>
+                    <a href="{% url 'upload_app:upload' %}" class="btn btn-primary">
+                        📤 آپلود فایل جدید
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

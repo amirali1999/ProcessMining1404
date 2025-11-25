@@ -1,0 +1,5 @@
+django
+psycopg2-binary  # درایور اتصال به PostgreSQL
+pandas           # برای کار با لاگ‌ها [cite: 33]
+django-storages  # برای اتصال جنگو به MinIO
+boto3            # پکیج کلاینت AWS S3 (که MinIO با آن سازگار است)
