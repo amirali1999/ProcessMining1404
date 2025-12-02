@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Heuristic Miner</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; }
+        label, select, button { font-size: 16px; margin: 5px 0; }
+        pre { background: #f4f4f4; padding: 10px; border: 1px solid #ddd; }
+        img { max-width: 100%; border: 1px solid #ccc; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Run Heuristic Miner</h1>
+
+    <form id="heuristicForm" method="post">
+        {% csrf_token %}
+        <label for="logSelect">Select log_name:</label>
+        <select id="logSelect" name="log_name">
+            {% for log in log_names %}
+                <option value="{{ log }}">{{ log }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <button type="submit">Run Heuristic Miner</button>
+    </form>
+
+    <h2>Result:</h2>
+    <pre id="result">No result yet</pre>
+
+    <h2>Petri Net:</h2>
+    <img id="petriNet" src="" alt="Petri net will appear here">
+
+    <script>
+        document.getElementById('heuristicForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const log_name = document.getElementById('logSelect').value;
+            if (!log_name) {
+                alert('Please select a log_name');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/heuristicMiner/', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ log_name })
+                });
+
+                const result = await res.json();
+
+                // نمایش JSON کامل
+                document.getElementById('result').textContent = JSON.stringify(result, null, 2);
+
+                if (res.ok && result.petri_net_image) {
+                    document.getElementById('petriNet').src = '/' + result.petri_net_image;
+                }
+
+            } catch (err) {
+                console.error('Error running Heuristic Miner:', err);
+                document.getElementById('result').textContent = 'Error running Heuristic Miner';
+            }
+        });
+    </script>
+</body>
+</html>

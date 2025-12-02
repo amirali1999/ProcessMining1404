@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Alpha Miner</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; }
+        label, select, button { font-size: 16px; margin: 5px 0; }
+        pre { background: #f4f4f4; padding: 10px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>Run Alpha Miner</h1>
+
+    <form id="alphaForm" method="post">
+        {% csrf_token %}
+        <label for="logSelect">Select log_name:</label>
+        <select id="logSelect" name="log_name">
+            {% for log in log_names %}
+                <option value="{{ log }}">{{ log }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <button type="submit">Run Alpha Miner</button>
+    </form>
+
+    <h2>Result:</h2>
+    <pre id="result">No result yet</pre>
+
+    <script>
+        document.getElementById('alphaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const log_name = document.getElementById('logSelect').value;
+            if (!log_name) {
+                alert('Please select a log_name');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/alphaMiner/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                    body: JSON.stringify({ log_name })
+                });
+
+                const result = await res.json();
+
+                if (res.ok) {
+                    document.getElementById('result').textContent = JSON.stringify(result, null, 2);
+                } else {
+                    document.getElementById('result').textContent = JSON.stringify(result, null, 2);
+                }
+            } catch (err) {
+                console.error('Error running Alpha Miner:', err);
+                document.getElementById('result').textContent = 'Error running Alpha Miner';
+            }
+        });
+    </script>
+</body>
+</html>
