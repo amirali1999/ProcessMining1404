@@ -1,0 +1,7 @@
+.idea/
+data/
+tmp/
+*.xlsx
+__pycache__/
+*.log
+*.pyc
