@@ -1,0 +1,236 @@
+:root{
+  --font-fa: "Vazirmatn", "Segoe UI", Tahoma, Arial, sans-serif;
+  --font-en: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --bg:#0f172a;          /* slate-900 */
+  --panel:#111827;       /* gray-900 */
+  --muted:#94a3b8;       /* slate-400 */
+  --text:#e5e7eb;        /* gray-200 */
+  --primary:#10b981;     /* emerald-500 */
+  --primary-600:#059669; /* emerald-600 */
+  --danger:#ef4444;      /* red-500 */
+  --border:#1f2937;      /* gray-800 */
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+/* body{
+  margin:0;
+  font-family: var(--font-fa);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color:var(--text);
+  background: radial-gradient(#1e293b 0%, #0b1220 70%, #070b14 100%);
+} */
+body {
+  display: flex;            /* keep body as flex column */
+  flex-direction: column;
+  min-height: 100vh;
+  margin:0;
+  font-family: var(--font-fa);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color:var(--text);
+  background: radial-gradient(#1e293b 0%, #0b1220 70%, #070b14 100%);
+}
+
+.latin, :lang(en){
+  font-family: var(--font-en);
+  letter-spacing:.2px;
+}
+
+/* Ensure controls inherit the correct font */
+button, input, select, textarea{
+  font-family: var(--font-fa);
+}
+.latin, :lang(en){
+  font-family: var(--font-en);
+  letter-spacing:.2px;
+}
+
+.container {
+  width: 1000px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem 1rem 3rem 1rem;
+  flex: 1 0 auto;           /* <-- added so footer stays at the bottom */
+}
+
+.site-header{position:sticky;top:0;background:rgba(17,24,39,.7);backdrop-filter: blur(6px);border-bottom:1px solid var(--border)}
+.navbar{display:flex;align-items:center;justify-content:space-between;direction: ltr;padding:1rem}
+.navbar a{color:var(--text);text-decoration:none;margin-inline-start:1rem}
+.navbar a:hover{opacity:.85}
+.brand a{font-weight:700}
+.btn{
+  display:inline-block;
+  border:1px solid var(--primary);
+  background:var(--primary);
+  color:#001b0f;
+  padding:.65rem 1rem;
+  border-radius:.6rem;
+  cursor:pointer;
+  text-decoration:none;
+  text-align:center;
+  font-weight:700;           /* thicker text for Persian readability */
+  font-size:1.05rem;         /* slightly larger for better balance */
+  line-height:1.2;
+  letter-spacing:.1px;
+  -webkit-appearance:none;
+  appearance:none;
+}
+.btn:hover{background:var(--primary-600);border-color:var(--primary-600)}
+.btn:focus{outline:none;box-shadow:0 0 0 3px rgba(16,185,129,.25)}
+.btn-primary{background:var(--primary);border-color:var(--primary);color:#001b0f}
+.btn-primary:hover{background:var(--primary-600);border-color:var(--primary-600)}
+.btn-sm{display: inline-block;font-size:.9rem;margin: .2rem;padding:.7rem .85rem;border-radius:.3rem;border:1px solid var(--border);}
+.btn-block{display:block;width:100%}
+.btn-text{border:none;background:transparent;color:var(--muted);cursor:pointer;padding:.25rem}
+.btn-text:hover{color:var(--text)}
+
+.messages{list-style:none;padding:0;margin:1rem 0}
+.message{padding:.6rem .8rem;border-radius:.5rem;border:1px solid var(--border);background:rgba(17,24,39,.6)}
+.message.success{border-color:#065f46;background:rgba(16,185,129,.08)}
+.message.error{border-color:#7f1d1d;background:rgba(239,68,68,.08)}
+.message.warning{border-color:#78350f;background:rgba(245,158,11,.08)}
+
+.auth{display:grid;place-items:center;min-height:calc(100vh - 120px)}
+.card{width:min(100%,520px);background:rgba(17,24,39,.8);border:1px solid var(--border);border-radius:1rem;box-shadow: 0 10px 35px rgba(0,0,0,.35)}
+.auth-card{padding:1.25rem}
+.card-title{margin:0 0 1rem 0}
+
+.form{display:grid;gap:1rem}
+.form-group label{display:block;margin-bottom:.4rem;color:var(--muted)}
+.form-group input{width:100%;padding:.7rem .85rem;border-radius:.6rem;border:1px solid var(--border);background:#0b1324;color:var(--text)}
+.form-group select{width:100%;padding:.7rem .85rem;border-radius:.6rem;border:1px solid var(--border);background:#0b1324;color:var(--text)}
+.form-group input:focus{outline:none;border-color:#334155;box-shadow:0 0 0 3px rgba(51,65,85,.35)}
+.password-field{display:flex;align-items:center;gap:.25rem}
+.password-field input{flex:1}
+.field-error{display:block;color:#ffb4b4;margin-top:.35rem}
+.alert{padding:.7rem .9rem;border-radius:.6rem;border:1px solid var(--border);background:rgba(17,24,39,.6)}
+.alert.error{border-color:#7f1d1d;background:rgba(239,68,68,.08)}
+
+.muted{color:var(--muted);font-size:.95rem}
+/* .site-footer{display: block;position: static;bottom: 0;width: 100%;margin-top: auto;background:rgb(12 17 28 / 83%);padding:1rem 1rem;text-align: center;border-top:1px solid var(--border);color:var(--muted);} */
+/* footer: use auto margin to stick to bottom when content is short */
+.site-footer {
+  margin-top: auto;         /* pushes footer down */
+  position: relative;       /* avoid overlap with other elements */
+  width: 100%;
+  background: rgb(12 17 28 / 83%);
+  padding: 1rem 1rem;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+}
+.dashboard-grid{
+  padding: 1.5rem 0;
+  display:flex;
+  flex-wrap:wrap;
+  gap:1rem;
+  align-items:flex-start;
+  justify-content:space-evenly; /* distribute cards with space between */
+  margin:1rem 0;
+}
+.dashboard-grid > .card{
+  flex: 1 1 calc(33.333% - 1rem); /* three columns */
+  min-width:220px;
+  max-width:360px;
+  width: auto; /* override .card's min(...) */
+}
+/* center a single card in the grid */
+.dashboard-grid > .card:only-child{
+  margin-left:auto;
+  margin-right:auto;
+}
+/* responsive breakpoints */
+@media (max-width:900px){
+  .dashboard-grid > .card{ flex: 1 1 calc(50% - 1rem); } /* two columns */
+}
+@media (max-width:520px){
+  .dashboard-grid > .card{ flex: 1 1 100%; } /* single column on small screens */
+}
+
+/* Ensure card titles are bright and stay bright when the link is visited/active/focused */
+a.card, a.card:link, a.card:visited, a.card:active, a.card:focus {
+  color: inherit; /* keep text color consistent inside the card */
+  text-decoration: none;
+}
+.hov{
+  color: #ffffff; /* bright title by default */
+  transition: color .18s ease;
+}
+/* if server marks the current card with .active, keep it bright as well */
+.card.active h3, a.card.active h3{
+  color: #ffffff;
+}
+
+/* Hover / focus: change only the card title color */
+.hov:hover {
+  color: var(--primary-600);
+}
+
+/* ============================================
+   MOBILE RESPONSIVE STYLES
+   ============================================ */
+@media (max-width: 768px) {
+  /* Container adjustments for mobile */
+  .container {
+    width: 100%;
+    padding: 0.75rem;
+  }
+  
+  /* Navbar responsive */
+  .navbar {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+  
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .navbar a {
+    margin-inline-start: 0;
+    font-size: 0.9rem;
+  }
+  
+  /* Buttons on mobile */
+  .btn {
+    padding: 0.55rem 0.85rem;
+    font-size: 0.95rem;
+  }
+  
+  .btn-sm {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.85rem;
+  }
+  
+  /* Auth forms on mobile */
+  .auth-card {
+    padding: 1rem;
+  }
+  
+  .card-title {
+    font-size: 1.25rem;
+  }
+  
+  /* Form inputs smaller on mobile */
+  .form-group input,
+  .form-group select {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.95rem;
+  }
+  
+  /* Dashboard cards stack on mobile */
+  .dashboard-grid {
+    padding: 1rem 0;
+  }
+  
+  /* Messages on mobile */
+  .message {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.9rem;
+  }
+}

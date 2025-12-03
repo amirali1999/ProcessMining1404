@@ -1,0 +1,13 @@
+numpy>=1.23.0
+pandas>=1.5.0
+scipy>=1.7.0
+pm4py>=2.7.0
+scikit-learn>=1.2.0
+joblib>=1.2.0
+tensorflow>=2.10.0
+keras>=2.10.0
+Django>=4.0.0
+djangorestframework>=3.14.0
+python-dateutil>=2.8.0
+pytz>=2021.3
+gunicorn>=20.1.0

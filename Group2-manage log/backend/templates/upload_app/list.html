@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}لیست فایل‌ها{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">📋 لیست Event Log های آپلود شده</h4>
+        <div>
+            <span class="badge bg-primary">{{ total_count }} فایل</span>
+            <span class="badge bg-success">{{ total_size_mb }} MB</span>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if logs %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>نام فایل</th>
+                        <th>حجم</th>
+                        <th>زمان آپلود</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>{{ log.id }}</td>
+                        <td>
+                            <a href="{% url 'upload_app:detail' log.pk %}">
+                                {{ log.original_filename }}
+                            </a>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">
+                                {{ log.get_file_size_mb }} MB
+                            </span>
+                        </td>
+                        <td>{{ log.uploaded_at|date:"Y/m/d H:i" }}</td>
+                        <td>
+                            <a href="{% url 'upload_app:detail' log.pk %}" 
+                               class="btn btn-sm btn-primary">
+                                مشاهده
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center">
+            <h5>هیچ فایلی آپلود نشده است</h5>
+            <a href="{% url 'upload_app:upload' %}" class="btn btn-primary mt-3">
+                📤 اولین فایل را آپلود کنید
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

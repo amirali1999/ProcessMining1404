@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}آپلود موفق{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">✅ آپلود موفقیت‌آمیز</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    <h5>فایل شما با موفقیت آپلود شد!</h5>
+                </div>
+                
+                <table class="table table-bordered">
+                    <tr>
+                        <th width="30%">نام فایل:</th>
+                        <td>{{ event_log.original_filename }}</td>
+                    </tr>
+                    <tr>
+                        <th>حجم فایل:</th>
+                        <td>{{ event_log.get_file_size_mb }} MB</td>
+                    </tr>
+                    <tr>
+                        <th>زمان آپلود:</th>
+                        <td>{{ event_log.uploaded_at|date:"Y/m/d H:i:s" }}</td>
+                    </tr>
+                    <tr>
+                        <th>شناسه فایل:</th>
+                        <td><code>{{ event_log.id }}</code></td>
+                    </tr>
+                    <tr>
+                        <th>مسیر ذخیره:</th>
+                        <td><code>{{ event_log.file.name }}</code></td>
+                    </tr>
+                </table>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'upload_app:upload' %}" class="btn btn-primary">
+                        📤 آپلود فایل جدید
+                    </a>
+                    <a href="{% url 'upload_app:list' %}" class="btn btn-secondary">
+                        📋 مشاهده لیست فایل‌ها
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
