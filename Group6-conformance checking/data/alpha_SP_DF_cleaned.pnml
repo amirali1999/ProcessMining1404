@@ -1,0 +1,135 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<pnml>
+  <net id="alpha_classic_net_1765190207.1128" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
+    <name>
+      <text>alpha_classic_net_1765190207.1128</text>
+    </name>
+    <page id="n0">
+      <place id="start">
+        <name>
+          <text>start</text>
+        </name>
+        <initialMarking>
+          <text>1</text>
+        </initialMarking>
+      </place>
+      <place id="end">
+        <name>
+          <text>end</text>
+        </name>
+      </place>
+      <transition id="STORNO">
+        <name>
+          <text>STORNO</text>
+        </name>
+      </transition>
+      <transition id="EMPTY">
+        <name>
+          <text>EMPTY</text>
+        </name>
+      </transition>
+      <transition id="CODE NOK">
+        <name>
+          <text>CODE NOK</text>
+        </name>
+      </transition>
+      <transition id="RELEASE">
+        <name>
+          <text>RELEASE</text>
+        </name>
+      </transition>
+      <transition id="CODE OK">
+        <name>
+          <text>CODE OK</text>
+        </name>
+      </transition>
+      <transition id="SET STATUS">
+        <name>
+          <text>SET STATUS</text>
+        </name>
+      </transition>
+      <transition id="ZDBC_BEHAN">
+        <name>
+          <text>ZDBC_BEHAN</text>
+        </name>
+      </transition>
+      <transition id="NEW">
+        <name>
+          <text>NEW</text>
+        </name>
+      </transition>
+      <transition id="JOIN-PAT">
+        <name>
+          <text>JOIN-PAT</text>
+        </name>
+      </transition>
+      <transition id="DELETE">
+        <name>
+          <text>DELETE</text>
+        </name>
+      </transition>
+      <transition id="REOPEN">
+        <name>
+          <text>REOPEN</text>
+        </name>
+      </transition>
+      <transition id="BILLED">
+        <name>
+          <text>BILLED</text>
+        </name>
+      </transition>
+      <transition id="CODE ERROR">
+        <name>
+          <text>CODE ERROR</text>
+        </name>
+      </transition>
+      <transition id="FIN">
+        <name>
+          <text>FIN</text>
+        </name>
+      </transition>
+      <transition id="REJECT">
+        <name>
+          <text>REJECT</text>
+        </name>
+      </transition>
+      <transition id="CHANGE DIAGN">
+        <name>
+          <text>CHANGE DIAGN</text>
+        </name>
+      </transition>
+      <transition id="CHANGE END">
+        <name>
+          <text>CHANGE END</text>
+        </name>
+      </transition>
+      <transition id="MANUAL">
+        <name>
+          <text>MANUAL</text>
+        </name>
+      </transition>
+      <arc id="2169158258016" source="FIN" target="end"/>
+      <arc id="2169156692608" source="CHANGE DIAGN" target="end"/>
+      <arc id="2169157767936" source="STORNO" target="end"/>
+      <arc id="2169157672240" source="start" target="NEW"/>
+      <arc id="2169158096912" source="NEW" target="end"/>
+      <arc id="2169158258320" source="SET STATUS" target="end"/>
+      <arc id="2169158096592" source="BILLED" target="end"/>
+      <arc id="2169158049744" source="DELETE" target="end"/>
+      <arc id="2169158126320" source="CODE OK" target="end"/>
+      <arc id="2169158125776" source="EMPTY" target="end"/>
+      <arc id="2169157898064" source="RELEASE" target="end"/>
+      <arc id="2169157902928" source="MANUAL" target="end"/>
+      <arc id="2169156693808" source="JOIN-PAT" target="end"/>
+      <arc id="2169256448240" source="CODE NOK" target="end"/>
+      <arc id="2169256448464" source="REJECT" target="end"/>
+    </page>
+    <finalmarkings>
+      <marking>
+        <place idref="end">
+          <text>1</text>
+        </place>
+      </marking>
+    </finalmarkings>
+  </net>
+</pnml>

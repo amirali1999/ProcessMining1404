@@ -1,0 +1,11 @@
+{
+    "model_file": "alpha_SP_DF_cleaned.pnml",
+    "log_file": "SP_DF_cleaned.csv",
+    "stats": {
+        "total_cases": 100000,
+        "compliant_cases": 22373,
+        "non_compliant_cases": 77627,
+        "compliant_percentage": 22.373,
+        "non_compliant_percentage": 77.627
+    }
+}

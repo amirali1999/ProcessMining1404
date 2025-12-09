@@ -1,0 +1,11 @@
+{
+    "model_file": "heuristic_SP_DF_cleaned.pnml",
+    "log_file": "SP_DF_cleaned.csv",
+    "stats": {
+        "total_cases": 100000,
+        "compliant_cases": 47127,
+        "non_compliant_cases": 52873,
+        "compliant_percentage": 47.127,
+        "non_compliant_percentage": 52.873000000000005
+    }
+}
