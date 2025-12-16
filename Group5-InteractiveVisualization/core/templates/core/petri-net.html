@@ -1,0 +1,53 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <span class="navbar-brand">Process Mining – Visualization</span>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <h3 class="mb-4">Alpha Miner Petri Net Model</h3>
+    <div class="card shadow-sm mb-5">
+        <div class="card-body text-center">
+            <img src="{% static 'core/output/alpha_test1_slides.png' %}"
+                class="img-fluid" alt="Alpha Miner Petri Net Visualization">
+        </div>
+    </div>
+
+
+    <h3 class="mb-4">Heuristic Miner Petri Net Model</h3>
+    <div class="card shadow-sm mb-5">
+        <div class="card-body text-center">
+            <img src="{% static 'core/output/heuristic_test1_slides.png' %}"
+                class="img-fluid" alt="Heuristic Miner Petri Net Visualization">
+        </div>
+    </div>
+
+
+
+    {% comment %} <div class="card shadow-sm">
+        <div class="card-body text-center">
+
+            {% if petri_net_image %}
+                <img src="{% static "core/output/heuristic_test1_slides.png" %}"
+                     class="img-fluid"
+                     alt="Heuristic Miner Petri Net Visualization">
+            {% else %}
+                <p class="text-muted">
+                    Petri Net visualization not available.
+                </p>
+            {% endif %}
+
+        </div>
+    </div> {% endcomment %}
+
+</div>
+
+{% endblock %}
+

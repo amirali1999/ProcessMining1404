@@ -1,0 +1,30 @@
+{% extends 'core/base.html' %}
+{% block content %}
+
+<h3 class="mb-4">Dashboard</h3>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">Directly-Follows Graph</div>
+            <div class="card-body">
+                <div class="chart-placeholder border rounded p-5 text-center">
+                    <p>(DFG Chart Will Be Rendered Here)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">Activity Frequency</div>
+            <div class="card-body">
+                <div class="chart-placeholder border rounded p-5 text-center">
+                    <p>(Activity Bar Chart Will Be Rendered Here)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
