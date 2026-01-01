@@ -11,6 +11,9 @@
 > تصویر نمونه از داشبورد نظارتی:
 
 ![Dashboard Overview](docs/dashboard_overview.png)
+> تصویر صفحه آپلود و بررسی تطابق:
+
+![Dashboard Overview](docs/comformance_runner.png)
 
 > تصویر صفحه جزئیات یک Run:
 
