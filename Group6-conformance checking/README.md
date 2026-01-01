@@ -1,70 +1,186 @@
-# پروژه تحلیل انطباق فرآیند با PM4Py
 
-این پروژه برای تحلیل انطباق فرآیند طراحی شده و با استفاده از مدل پتری نت (PNML) و لاگ رویداد (CSV)، انطباق هر case را با مدل بررسی می کند. الگوریتم اصلی مورد استفاده Token Replay از کتابخانه PM4Py است. علاوه بر آن، معیارهای پیشرفته انطباق (Fitness و Precision) نیز برای کل لاگ محاسبه و در خروجی JSON ذخیره می شوند.
+# داشبورد نظارتی تحلیل انطباق فرآیند
+(Process Conformance Monitoring Dashboard)
+
+این پروژه با هدف **تحلیل و پایش انطباق فرآیندها** طراحی شده است. سیستم با استفاده از مدل فرآیند (Petri Net) و لاگ رویداد، میزان انطباق اجرای واقعی فرآیند با مدل مرجع را محاسبه کرده و نتایج را به صورت یک **داشبورد نظارتی دوره ای** نمایش می دهد.
+
+---
+
+## نمای کلی داشبورد
+
+> تصویر نمونه از داشبورد نظارتی:
+
+![Dashboard Overview](docs/dashboard_overview.png)
+
+> تصویر صفحه جزئیات یک Run:
+
+![Run Detail](docs/run_detail.png)
+
+---
 
 ## هدف پروژه
-- بارگذاری مدل فرآیند (Petri Net)
-- بارگذاری لاگ رویداد
-- اجرای Token Replay
-- جداسازی case های منطبق و غیرمنطبق
-- محاسبه معیارهای پیشرفته انطباق (Fitness و Precision)
-- ذخیره خروجی در فایل های CSV و JSON
 
-## ورودی ها
-- فایل مدل با فرمت PNML
-- فایل لاگ رویداد CSV با ستون های:
-  - case_id یا case:concept:name
-  - activity یا concept:name
-  - timestamp یا time:timestamp
+- اجرای تحلیل انطباق فرآیند با استفاده از Token Replay
+- محاسبه شاخص های کلاسیک و پیشرفته انطباق
+- ذخیره نتایج هر اجرا به عنوان یک Run مستقل
+- پایش تغییرات انطباق در طول زمان
+- ارائه یک داشبورد تعاملی و قابل توسعه
 
-## خروجی ها
-- compliant_<model>_<log>.csv
-- non_compliant_<model>_<log>.csv
-- <model>_<log>_summary.json
+---
 
-## نسخه های تست شده
-- pm4py 2.7.19.2
-- pandas 2.3.1
-- numpy 2.0.2
-- matplotlib 3.9.4
-- networkx 3.2.1
-- graphviz 0.21
-- Python 3.10
+## معماری کلی سیستم
 
-## نحوه اجرا
-```python
-pnml_file_path = "./data/heuristic_SP_DF_cleaned.pnml"
-log_csv_file_path = "./data/SP_DF_cleaned.csv"
-process_log(pnml_file_path, log_csv_file_path)
+پروژه از دو بخش اصلی تشکیل شده است:
+
+### 1) بخش تحلیل انطباق (Conformance Checking)
+
+این بخش مستقل از Django است و با استفاده از کتابخانه PM4Py پیاده سازی شده است.
+
+**ورودی ها**
+- فایل مدل فرآیند با فرمت PNML
+- فایل لاگ رویداد با فرمت CSV
+
+**خروجی ها**
+- فایل Summary با فرمت JSON
+- فایل CSV کیس های منطبق
+- فایل CSV کیس های غیرمنطبق
+
+پیاده سازی در فایل:
+```
+conformance_runner.py
 ```
 
+---
 
+### 2) بخش داشبورد نظارتی (Monitoring Dashboard)
 
-## توضیح فایل های CSV خروجی
-- فایل `compliant_<model>_<log>.csv` شامل تمام رخدادهای مربوط به case هایی است که به طور کامل با مدل پتری نت منطبق بوده اند.
-- فایل `non_compliant_<model>_<log>.csv` شامل تمام رخدادهای مربوط به case هایی است که حداقل یک انحراف از مدل فرآیند داشته اند.
-- 
-## نمونه خروجی JSON
-```json
-{
-    "model_file": "heuristic_SP_DF_cleaned.pnml",
-    "log_file": "SP_DF_cleaned.csv",
-    "timestamp_key_used": "time:timestamp",
-    "stats": {
-        "total_cases": 100000,
-        "compliant_cases": 47127,
-        "non_compliant_cases": 52873,
-        "compliant_percentage": 47.127,
-        "non_compliant_percentage": 52.873000000000005
-    },
-    "advanced_conformance": {
-        "fitness": {
-            "perc_fit_traces": 47.127,
-            "average_trace_fitness": 0.9272932457539153,
-            "log_fitness": 0.9173290234278992,
-            "percentage_of_fitting_traces": 47.127
-        },
-        "precision": 0.9082817362189379
-    }
-}
+این بخش با Django و پایگاه داده SQLite پیاده سازی شده و فقط مصرف کننده خروجی های تحلیل انطباق است.
+
+وظایف:
+- دریافت فایل های PNML و CSV از طریق رابط کاربری
+- اجرای خودکار تحلیل انطباق
+- ذخیره نتایج هر اجرا به عنوان یک Run
+- نمایش وضعیت فعلی و روند تغییرات شاخص ها
+- مدیریت Run ها (مشاهده، حذف، دانلود خروجی ها)
+
+---
+
+## جریان داده (Data Flow)
+
 ```
+Upload PNML & CSV
+        ↓
+conformance_runner.py
+        ↓
+Token Replay / Fitness / Precision
+        ↓
+JSON + CSV
+        ↓
+SQLite
+        ↓
+Monitoring Dashboard
+```
+
+---
+
+## شاخص های محاسبه شده
+
+### شاخص های پایه
+- تعداد کل case ها
+- تعداد case های منطبق
+- تعداد case های غیرمنطبق
+- درصد انطباق
+- درصد عدم انطباق
+
+### شاخص های پیشرفته
+- Fitness (log fitness)
+- Average Trace Fitness
+- Percentage of Fitting Traces
+- Precision
+
+---
+
+## ساختار پروژه
+
+```
+monitoring_dashboard/
+├── manage.py
+├── conformance_runner.py
+├── db.sqlite3
+├── monitoring_dashboard/
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── monitoring/
+│   ├── models.py
+│   ├── views.py
+│   ├── urls.py
+│   ├── forms.py
+│   └── templates/
+│       └── monitoring/
+│           ├── base.html
+│           ├── index.html
+│           ├── upload.html
+│           └── run_detail.html
+└── uploaded_data/
+    └── runs/
+```
+
+---
+
+## راه اندازی پروژه
+
+### نصب وابستگی ها
+```bash
+pip install django pm4py pandas
+```
+
+### آماده سازی دیتابیس
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+### اجرای سرور
+```bash
+python manage.py runserver
+```
+
+داشبورد در آدرس زیر در دسترس است:
+```
+http://127.0.0.1:8000/
+```
+
+---
+
+## اجرای تحلیل جدید
+
+1. ورود به صفحه «اجرای تحلیل جدید»
+2. انتخاب فایل PNML
+3. انتخاب فایل CSV
+4. اجرای تحلیل
+5. مشاهده نتایج در داشبورد
+
+---
+
+## توسعه های آینده
+
+- اجرای غیرهمزمان تحلیل (Celery)
+- انتخاب مدل از Run های قبلی
+- خروجی PDF
+- اتصال به PostgreSQL
+- احراز هویت کاربران
+
+---
+
+## نکته مهم درباره تصاویر README
+
+تصاویر داشبورد در پوشه زیر قرار می گیرند:
+
+```
+docs/
+├── dashboard_overview.png
+└── run_detail.png
+```
+
+مسیر تصاویر در README به صورت نسبی تنظیم شده است و در GitHub به درستی نمایش داده می شود.
