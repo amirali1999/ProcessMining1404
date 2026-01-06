@@ -1,0 +1,21 @@
+{
+    "model_file": "heuristic_SP_DF_cleaned.pnml",
+    "log_file": "SP_DF_cleaned.csv",
+    "timestamp_key_used": "time:timestamp",
+    "stats": {
+        "total_cases": 100000,
+        "compliant_cases": 47127,
+        "non_compliant_cases": 52873,
+        "compliant_percentage": 47.127,
+        "non_compliant_percentage": 52.873000000000005
+    },
+    "advanced_conformance": {
+        "fitness": {
+            "perc_fit_traces": 47.127,
+            "average_trace_fitness": 0.9272932457539153,
+            "log_fitness": 0.9173290234278992,
+            "percentage_of_fitting_traces": 47.127
+        },
+        "precision": 0.9082817362189379
+    }
+}

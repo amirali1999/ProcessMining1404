@@ -1,0 +1,50 @@
+{% extends "monitoring/base.html" %}
+{% block content %}
+
+<div class="row g-3">
+  <div class="col-12 col-lg-7">
+    <div class="card shadow-soft border-0">
+      <div class="card-body">
+        <h5 class="fw-bold mb-1">اجرای تحلیل انطباق جدید</h5>
+        <div class="muted mb-3">PNML و CSV را آپلود کنید تا تحلیل اجرا و نتیجه ثبت شود.</div>
+
+        <form method="post" enctype="multipart/form-data" class="needs-validation">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label class="form-label">مدل فرآیند (PNML)</label>
+            {{ form.pnml_file }}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">لاگ رویداد (CSV)</label>
+            {{ form.log_csv }}
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            اجرای تحلیل
+          </button>
+          <a href="{% url 'monitoring:index' %}" class="btn btn-outline-secondary ms-2">
+            بازگشت
+          </a>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-5">
+    <div class="card shadow-soft border-0">
+      <div class="card-body">
+        <h6 class="fw-bold">راهنما</h6>
+        <ul class="mb-0">
+          <li>CSV باید ستون های case_id یا case:concept:name داشته باشد.</li>
+          <li>ستون فعالیت: activity یا concept:name</li>
+          <li>ستون زمان: time:timestamp یا timestamp</li>
+          <li>پس از اجرا، خروجی ها در uploaded_data/runs ذخیره می شوند.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monitoring Dashboard</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/Vazirmatn-font-face.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --text:#0f172a;
+      --muted:#64748b;
+      --card:#ffffff;
+    }
+    body{
+      background: var(--bg);
+      color: var(--text);
+      font-family: Vazirmatn, ui-sans-serif, system-ui;
+      font-size: 14px;
+    }
+    .shadow-soft{ box-shadow: 0 10px 28px rgba(15, 23, 42, .08); }
+    .muted{ color: var(--muted); }
+    .mono{ font-variant-numeric: tabular-nums; }
+
+    .card-kpi{ border: 0; border-radius: 16px; background: var(--card); }
+    .card-kpi .card-body{ padding: 14px 14px; }
+
+    .kpi-label{ font-size: 12px; font-weight: 600; letter-spacing: .1px; }
+    .kpi-value{ font-size: 22px; font-weight: 800; line-height: 1.25; margin-top: 4px; }
+    .kpi-sub{ font-size: 11px; margin-top: 6px; }
+
+    .table td, .table th{ padding: 10px 10px; }
+    .table thead th{ font-size: 12px; color: var(--muted); font-weight: 700; }
+
+    .btn{ border-radius: 12px; }
+  </style>
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg bg-white border-bottom">
+  <!-- این کانتینر فاصله از حاشیه را درست می کند -->
+  <div class="container-fluid px-4 py-2 align-items-center">
+
+    <!-- برند سمت راست -->
+    <a class="navbar-brand fw-bold m-0" href="{% url 'monitoring:index' %}">
+      داشبورد نظارتی
+    </a>
+
+    <!-- دکمه ها سمت چپ (ms-auto در RTL هل می دهد سمت چپ) -->
+    <div class="d-flex gap-2 ms-auto">
+      <a
+        href="{% url 'monitoring:index' %}"
+        class="btn {% if request.resolver_match.url_name == 'index' or request.resolver_match.url_name == 'run_detail' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+        داشبورد
+      </a>
+
+      <a
+        href="{% url 'monitoring:upload' %}"
+        class="btn {% if request.resolver_match.url_name == 'upload' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+        اجرای تحلیل جدید
+      </a>
+    </div>
+
+  </div>
+</nav>
+
+<main class="container my-4">
+  {% block content %}{% endblock %}
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+{% extends "monitoring/base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+  <div>
+    <h4 class="fw-bold mb-1">جزئیات Run #{{ run.id }}</h4>
+    <div class="muted">مدل: {{ run.model_file }} | لاگ: {{ run.log_file }}</div>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'monitoring:index' %}">بازگشت</a>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="card card-kpi shadow-soft">
+      <div class="card-body">
+        <div class="muted">کل case ها</div>
+        <div class="display-6 fw-bold mono">{{ run.total_cases }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="card card-kpi shadow-soft">
+      <div class="card-body">
+        <div class="muted">منطبق</div>
+        <div class="display-6 fw-bold mono">{{ run.compliant_cases }}</div>
+        <div class="muted mt-2 mono">{{ run.compliant_percentage|floatformat:3 }}%</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="card card-kpi shadow-soft">
+      <div class="card-body">
+        <div class="muted">غیرمنطبق</div>
+        <div class="display-6 fw-bold mono">{{ run.non_compliant_cases }}</div>
+        <div class="muted mt-2 mono">{{ run.non_compliant_percentage|floatformat:3 }}%</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="card card-kpi shadow-soft">
+      <div class="card-body">
+        <div class="muted">timestamp</div>
+        <div class="fw-bold mono">{{ run.timestamp_key_used|default:"-" }}</div>
+        <div class="muted mt-2 small mono">{{ run.created_at }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-soft border-0">
+  <div class="card-body">
+    <h6 class="fw-bold mb-3">شاخص های پیشرفته</h6>
+    <div class="row g-3">
+      <div class="col-12 col-md-4">
+        <div class="muted">Fitness (log_fitness)</div>
+        <div class="fw-bold mono">{{ run.log_fitness|default:"-" }}</div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="muted">Average trace fitness</div>
+        <div class="fw-bold mono">{{ run.average_trace_fitness|default:"-" }}</div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="muted">Fit traces %</div>
+        <div class="fw-bold mono">{{ run.percentage_of_fitting_traces|default:"-" }}</div>
+      </div>
+      <div class="col-12 col-md-4 mt-3">
+        <div class="muted">Precision</div>
+        <div class="fw-bold mono">{{ run.precision|default:"-" }}</div>
+      </div>
+    </div>
+    <hr class="my-4">
+
+    <h6 class="fw-bold mb-2">فایل ها</h6>
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead>
+          <tr class="muted">
+            <th>نوع</th>
+            <th>نام فایل</th>
+            <th class="text-end">عملیات</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Summary</td>
+            <td class="mono">{{ run.summary_json_path|cut:run.summary_json_path|default:"-" }}</td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'monitoring:run_download' run.id 'summary' %}">دانلود</a>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Compliant CSV</td>
+            <td class="mono">{{ run.compliant_csv_path|default:"-"|slice:"-60:" }}</td>
+            <td class="text-end">
+              {% if run.compliant_csv_path %}
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'monitoring:run_download' run.id 'compliant' %}">دانلود</a>
+              {% else %}-{% endif %}
+            </td>
+          </tr>
+
+          <tr>
+            <td>Non compliant CSV</td>
+            <td class="mono">{{ run.non_compliant_csv_path|default:"-"|slice:"-60:" }}</td>
+            <td class="text-end">
+              {% if run.non_compliant_csv_path %}
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'monitoring:run_download' run.id 'non_compliant' %}">دانلود</a>
+              {% else %}-{% endif %}
+            </td>
+          </tr>
+
+          <tr>
+            <td>PNML</td>
+            <td class="mono">{{ run.pnml_path|default:"-"|slice:"-60:" }}</td>
+            <td class="text-end">
+              {% if run.pnml_path %}
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'monitoring:run_download' run.id 'pnml' %}">دانلود</a>
+              {% else %}-{% endif %}
+            </td>
+          </tr>
+
+          <tr>
+            <td>Input CSV</td>
+            <td class="mono">{{ run.log_csv_path|default:"-"|slice:"-60:" }}</td>
+            <td class="text-end">
+              {% if run.log_csv_path %}
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'monitoring:run_download' run.id 'input_csv' %}">دانلود</a>
+              {% else %}-{% endif %}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+
+{% endblock %}

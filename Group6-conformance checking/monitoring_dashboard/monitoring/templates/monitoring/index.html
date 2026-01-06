@@ -1,0 +1,153 @@
+{% extends "monitoring/base.html" %}
+{% block content %}
+
+<div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">
+  <div>
+    <h5 class="fw-bold mb-1">وضعیت انطباق فرآیند</h5>
+    <div class="muted small">نمایش آخرین Run و روند تغییرات</div>
+  </div>
+</div>
+
+{% if latest %}
+<div class="row g-3 mb-3">
+
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="card card-kpi shadow-soft">
+      <div class="card-body">
+        <div class="muted kpi-label mb-1">کل case ها</div>
+        <div class="kpi-value mono">{{ latest.total_cases }}</div>
+        <div class="muted kpi-sub mt-2">مدل: {{ latest.model_file }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="card card-kpi shadow-soft">
+      <div class="card-body">
+        <div class="muted kpi-label mb-1">درصد انطباق</div>
+        <div class="kpi-value mono">{{ latest.compliant_percentage|floatformat:3 }}%</div>
+        <div class="muted kpi-sub mt-2">لاگ: {{ latest.log_file }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="card card-kpi shadow-soft">
+      <div class="card-body">
+        <div class="muted kpi-label mb-1">Fitness (log_fitness)</div>
+        <div class="kpi-value mono">
+          {{ latest.log_fitness|floatformat:3|default:"-" }}
+        </div>
+        <div class="muted kpi-sub mt-2">
+          timestamp: {{ latest.timestamp_key_used|default:"-" }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="card card-kpi shadow-soft">
+      <div class="card-body">
+        <div class="muted kpi-label mb-1">Precision</div>
+        <div class="kpi-value mono">
+          {{ latest.precision|floatformat:3|default:"-" }}
+        </div>
+        <div class="muted kpi-sub mt-2">
+          آخرین اجرا: {{ latest.created_at|date:"Y/m/d H:i" }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="card shadow-soft border-0 mb-4">
+  <div class="card-body">
+    <div class="fw-bold mb-2">روند تغییرات شاخص ها</div>
+    <canvas id="trendChart" height="90"></canvas>
+  </div>
+</div>
+
+<script>
+  const labels = {{ labels|safe }};
+  const compliantSeries = {{ compliant_series|safe }};
+  const fitnessSeries = {{ fitness_series|safe }};
+  const precisionSeries = {{ precision_series|safe }};
+
+  new Chart(document.getElementById("trendChart"), {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [
+        { label: "Compliant", data: compliantSeries, tension: 0.35 },
+        { label: "Log fitness", data: fitnessSeries, tension: 0.35 },
+        { label: "Precision", data: precisionSeries, tension: 0.35 },
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: "bottom" }
+      },
+      scales: {
+        y: { beginAtZero: false }
+      }
+    }
+  });
+</script>
+
+<div class="card shadow-soft border-0">
+  <div class="card-body">
+    <div class="fw-bold mb-2">لیست اجراها</div>
+    <div class="table-responsive">
+      <table class="table table-sm align-middle">
+        <thead>
+          <tr class="muted">
+            <th>زمان</th>
+            <th>مدل</th>
+            <th>لاگ</th>
+            <th>انطباق</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for r in runs %}
+          <tr>
+            <td class="mono">{{ r.created_at|date:"Y/m/d H:i" }}</td>
+            <td>{{ r.model_file }}</td>
+            <td>{{ r.log_file }}</td>
+            <td class="mono">{{ r.compliant_percentage|floatformat:3 }}%</td>
+            <td class="text-end">
+              <div class="d-flex justify-content-end gap-2">
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'monitoring:run_detail' r.id %}">
+                  جزئیات
+                </a>
+
+                <form method="post" action="{% url 'monitoring:run_delete' r.id %}" class="m-0">
+                  {% csrf_token %}
+                  <button
+                    type="submit"
+                    class="btn btn-sm btn-outline-danger"
+                    onclick="return confirm('این Run حذف شود؟ این عملیات قابل بازگشت نیست.');">
+                    حذف
+                  </button>
+                </form>
+              </div>
+            </td>
+
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% else %}
+<div class="alert alert-info border-0 shadow-soft">
+  هنوز هیچ Run ای ثبت نشده است.
+  از دکمه <b>اجرای تحلیل جدید</b> استفاده کنید.
+</div>
+{% endif %}
+
+{% endblock %}
