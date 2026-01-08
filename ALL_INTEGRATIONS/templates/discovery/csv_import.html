@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Import - {{ session.original_filename }}</title>
+    <link rel="stylesheet" href="{% static 'css/csv_import.css' %}">
+</head>
+<body>
+    <div class="csv-import-container">
+        <!-- Header with Blue Gradient -->
+        <div class="csv-header">
+            <div class="header-left">
+                <div class="selected-column-area">
+                    <span class="column-label">Select column:</span>
+                    <span class="column-name" id="selected-column-name">No column selected</span>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <button class="header-icon-btn" title="Case ID column">👤</button>
+                <button class="header-icon-btn" title="Activity column">⚙️</button>
+                <button class="header-icon-btn" title="Timestamp column">🕐</button>
+                <button class="header-icon-btn" title="Resource column">👥</button>
+            </div>
+
+            <div class="header-right">
+                <span class="file-name">{{ session.original_filename }}</span>
+            </div>
+        </div>
+
+        <!-- Preview Table -->
+        <div class="preview-table-container">
+            <table class="preview-table" id="preview-table">
+                <thead>
+                    <tr>
+                        {% for column in columns %}
+                        <th class="column-header" data-column="{{ column }}">
+                            {{ column }}
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        {% for cell in row %}
+                        <td>{{ cell }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            {% if not columns %}
+            <div class="no-data-message">
+                <p>⚠️ Could not read CSV file. Please check the file format.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Bottom Toolbar -->
+        <div class="csv-bottom-toolbar">
+            <div class="toolbar-left">
+                <label class="toolbar-label">Encoding:</label>
+                <select class="encoding-dropdown" id="encoding-dropdown">
+                    <option value="utf-8" {% if detected_encoding == 'utf-8' %}selected{% endif %}>UTF-8</option>
+                    <option value="iso-8859-1" {% if detected_encoding == 'iso-8859-1' %}selected{% endif %}>ISO-8859-1</option>
+                    <option value="windows-1252" {% if detected_encoding == 'windows-1252' %}selected{% endif %}>Windows-1252</option>
+                    <option value="ascii">ASCII</option>
+                </select>
+            </div>
+            
+            <div class="toolbar-right">
+                <button class="btn-cancel" onclick="window.history.back()">Cancel</button>
+                <button class="btn-start-import" id="start-import-btn">Start import & discovery</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/csv_import.js' %}"></script>
+</body>
+</html>

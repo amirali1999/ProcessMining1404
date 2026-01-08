@@ -1,0 +1,242 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block content %}
+<!-- Section 1: Manage Tokens -->
+<div style="margin-bottom: 2.5rem;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 0.5rem; overflow: hidden;">
+        <!-- Section Header -->
+        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 1rem 1.5rem; border-bottom: 2px solid var(--primary);">
+            <h2 style="color: var(--primary); font-size: 20px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.75rem; letter-spacing: 0.5px;">
+                <span style="font-size: 24px;">🔑</span>
+                Manage API Tokens
+            </h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin: 0.5rem 0 0 2.25rem;">
+                View and manage authentication tokens for API access
+            </p>
+        </div>
+        
+        <!-- Content from parent template (search, filters, table) -->
+        <div style="padding: 0;">
+            {{ block.super }}
+        </div>
+    </div>
+</div>
+
+<!-- Section 2: Generate New Token -->
+<div style="margin-bottom: 2rem;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 0.5rem; overflow: hidden;">
+        <!-- Section Header -->
+        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 1rem 1.5rem; border-bottom: 2px solid var(--primary);">
+            <h2 style="color: var(--primary); font-size: 20px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.75rem; letter-spacing: 0.5px;">
+                <span style="font-size: 24px;">➕</span>
+                Generate New Token
+            </h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin: 0.5rem 0 0 2.25rem;">
+                Create a new API authentication token for a user
+            </p>
+        </div>
+        
+        <!-- Form Container -->
+        <div style="padding: 2rem;">
+            <form method="post" action="{% url 'admin:authtoken_tokenproxy_add' %}">
+                {% csrf_token %}
+                
+                <!-- User Selection Field -->
+                <div style="margin-bottom: 2rem;">
+                    <label for="id_user" style="display: block; color: var(--text-secondary); font-weight: 600; font-size: 14px; margin-bottom: 0.625rem;">
+                        User <span style="color: #ef4444; font-weight: 700;">*</span>
+                    </label>
+                    <select 
+                        name="user" 
+                        id="id_user" 
+                        required
+                        style="width: 100%; max-width: 600px; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 0.5rem; padding: 0.875rem 1.25rem; font-size: 15px; font-weight: 500; transition: all 0.2s ease; cursor: pointer;"
+                    >
+                        <option value="">Select a user...</option>
+                        {% for user in all_users %}
+                        <option value="{{ user.id }}">{{ user.username }} ({{ user.email|default:"No email" }})</option>
+                        {% endfor %}
+                    </select>
+                    <small style="display: block; color: var(--text-muted); font-size: 12px; margin-top: 0.625rem; line-height: 1.5;">
+                        👤 Select the user for whom to generate an API token
+                    </small>
+                </div>
+                
+                <!-- Info Box -->
+                <div style="margin-bottom: 2rem; padding: 1.25rem; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 0.5rem;">
+                    <div style="display: flex; align-items: start; gap: 0.75rem;">
+                        <span style="font-size: 20px; flex-shrink: 0; margin-top: 2px;">💡</span>
+                        <div>
+                            <p style="color: var(--text-primary); font-weight: 600; font-size: 14px; margin: 0 0 0.5rem 0;">
+                                API Token Guidelines
+                            </p>
+                            <ul style="color: var(--text-muted); font-size: 13px; margin: 0; padding-left: 1.25rem; line-height: 1.7;">
+                                <li>Each user can have <strong>only one token</strong> at a time</li>
+                                <li>Token is <strong>automatically generated</strong> by Django (40 characters)</li>
+                                <li>If a user already has a token, creating a new one will <strong>replace the old token</strong></li>
+                                <li>Tokens are used for API authentication via <code style="background: var(--bg-dark); padding: 2px 6px; border-radius: 3px;">Authorization: Token &lt;key&gt;</code> header</li>
+                                <li>Keep tokens <strong>secure</strong> - they provide full access to the user's account</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Security Warning Box -->
+                <div style="margin-bottom: 2rem; padding: 1.25rem; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 0.5rem;">
+                    <div style="display: flex; align-items: start; gap: 0.75rem;">
+                        <span style="font-size: 20px; flex-shrink: 0; margin-top: 2px;">⚠️</span>
+                        <div>
+                            <p style="color: #ef4444; font-weight: 600; font-size: 14px; margin: 0 0 0.5rem 0;">
+                                Security Notice
+                            </p>
+                            <p style="color: var(--text-muted); font-size: 13px; margin: 0; line-height: 1.7;">
+                                The generated token will be displayed <strong>only once</strong> after creation. Make sure to copy it immediately. 
+                                If lost, you'll need to regenerate a new token (which will invalidate the old one).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Submit Buttons -->
+                <div style="display: flex; flex-wrap: wrap; gap: 0.875rem; padding-top: 1.25rem; border-top: 2px solid var(--border-color);">
+                    <button 
+                        type="submit" 
+                        name="_save"
+                        style="background: var(--primary); color: #001b0f; border: none; border-radius: 0.5rem; padding: 0.75rem 2rem; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.625rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);"
+                        onmouseover="this.style.background='var(--primary-dark)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)'"
+                        onmouseout="this.style.background='var(--primary)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(16, 185, 129, 0.3)'"
+                    >
+                        <span style="font-size: 18px;">🔑</span>
+                        <span>Generate Token</span>
+                    </button>
+                    
+                    <button 
+                        type="submit" 
+                        name="_addanother"
+                        style="background: transparent; color: var(--primary); border: 2px solid var(--primary); border-radius: 0.5rem; padding: 0.75rem 1.75rem; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.625rem;"
+                        onmouseover="this.style.background='rgba(16, 185, 129, 0.1)'; this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.background='transparent'; this.style.transform='translateY(0)'"
+                    >
+                        <span style="font-size: 18px;">➕</span>
+                        <span>Generate and add another</span>
+                    </button>
+                    
+                    <button 
+                        type="submit" 
+                        name="_continue"
+                        style="background: transparent; color: var(--text-secondary); border: 2px solid var(--border-color); border-radius: 0.5rem; padding: 0.75rem 1.75rem; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.625rem;"
+                        onmouseover="this.style.borderColor='var(--text-secondary)'; this.style.background='rgba(203, 213, 225, 0.05)'; this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.borderColor='var(--border-color)'; this.style.background='transparent'; this.style.transform='translateY(0)'"
+                    >
+                        <span style="font-size: 18px;">✏️</span>
+                        <span>Generate and continue editing</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ==================== TOKEN PAGE LAYOUT ==================== */
+
+/* Ensure vertical stack layout */
+.model-tokenproxy.change-list #content-main {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+}
+
+/* Remove side-by-side layout issues */
+.model-tokenproxy.change-list #content-main > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+}
+
+/* Section spacing */
+.model-tokenproxy.change-list #changelist {
+    margin-bottom: 0 !important;
+}
+
+/* Select field focus states */
+#id_user:focus {
+    outline: none !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15) !important;
+    transform: translateY(-1px);
+}
+
+/* Select field styling */
+#id_user {
+    font-weight: 500;
+}
+
+/* Button hover effects */
+button[type="submit"]:active {
+    transform: scale(0.97) !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    /* Stack buttons vertically on mobile */
+    form > div:last-of-type {
+        flex-direction: column !important;
+    }
+    
+    form > div:last-of-type button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+    
+    /* Full width select on mobile */
+    #id_user {
+        max-width: 100% !important;
+    }
+}
+
+/* Section headers gradient enhancement */
+.model-tokenproxy.change-list h2 {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Smooth scroll behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Label hover effects */
+label[for="id_user"]:hover {
+    color: var(--primary);
+    transition: color 0.2s ease;
+}
+
+/* Info box icon animations */
+.model-tokenproxy.change-list div[style*="rgba(59, 130, 246"] span:first-child {
+    animation: gentlePulse 3s ease-in-out infinite;
+}
+
+.model-tokenproxy.change-list div[style*="rgba(239, 68, 68"] span:first-child {
+    animation: warningPulse 2s ease-in-out infinite;
+}
+
+@keyframes gentlePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes warningPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+/* Code styling in info box */
+code {
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "admin/base_site.html" %} {% load i18n static %} {% block extrahead
+%} {{ block.super }}
+<style>
+  #content h1,
+  .dashboard #content h1 {
+    display: none !important;
+  }
+  .dashboard #content-main {
+    display: none !important;
+  }
+  #nav-filter {
+    display: none !important;
+  }
+</style>
+{% endblock %} {% block content_title %}{% endblock %} {% block content %}{%
+endblock %}

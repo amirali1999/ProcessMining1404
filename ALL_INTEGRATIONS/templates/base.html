@@ -1,0 +1,61 @@
+{% load static %}
+{% load translate %}
+<!DOCTYPE html>
+<html lang="{% get_language %}" dir="{% get_direction %}">
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}{% trans 'dashboard' %}{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Web Fonts: Persian (Vazirmatn) and English (Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Vazirmatn:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>  <header class="site-header">
+    <div class="container">
+      <nav class="navbar">
+        <div class="brand"><a {% if request.session.language == 'en' %}class="latin"{% endif %} href="{% url 'dashboard' %}">{% trans 'project_title' %}</a></div>
+        
+        <!-- Right side: Nav Links + Language Switcher -->
+        <div class="navbar-right">
+          <div class="nav-links" {% if request.session.language == 'en' %}style="flex-direction: row;"{% else %}style="flex-direction: row-reverse;"{% endif %}>
+            {% if user.is_authenticated %}
+              <a href="{% url 'dashboard' %}">{% trans 'dashboard' %}</a>
+              {% if user.is_admin %}<a href="{% url 'admin_only' %}">{% trans 'admin_page' %}</a>{% endif %}
+              <a href="{% url 'logout' %}">{% trans 'logout' %}</a>
+            {% else %}
+              <a href="{% url 'login' %}">{% trans 'login' %}</a>
+              <a class="btn btn-sm" href="{% url 'register' %}">{% trans 'register' %}</a>
+            {% endif %}
+          </div>
+          
+          <!-- Language Switcher -->
+          <div class="language-switcher">
+            {% if request.session.language == 'en' %}
+              <a href="{% url 'set_language' %}?lang=fa" class="lang-btn" title="فارسی">FA</a>
+            {% else %}
+              <a href="{% url 'set_language' %}?lang=en" class="lang-btn" title="English">EN</a>
+            {% endif %}
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {% if messages %}
+      <ul class="messages">
+        {% for m in messages %}
+          <li class="message {{ m.tags }}">{{ m }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <small>{% trans 'footer_text' %}</small>
+  </footer>
+</body>
+</html>

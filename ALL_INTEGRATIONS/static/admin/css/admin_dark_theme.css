@@ -1,0 +1,2337 @@
+/* 
+ * Django Admin Dark Theme with Emerald Green Accent
+ * Matches the main application dark theme
+ */
+
+:root {
+  --primary: #10b981; /* emerald-500 */
+  --primary-dark: #059669; /* emerald-600 */
+  --primary-darker: #047857; /* emerald-700 */
+  --bg-dark: #0f172a; /* slate-900 */
+  --bg-panel: #111827; /* gray-900 */
+  --bg-card: #1e293b; /* slate-800 */
+  --border-color: #1f2937; /* gray-800 */
+  --text-primary: #e5e7eb; /* gray-200 */
+  --text-secondary: #94a3b8; /* slate-400 */
+  --text-muted: #64748b; /* slate-500 */
+
+  /* Font families - matching main app */
+  --font-fa: "Vazirmatn", "Segoe UI", Tahoma, Arial, sans-serif;
+  --font-en: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+    sans-serif;
+}
+
+/* ==================== GLOBAL STYLES ==================== */
+
+/* Force dark mode - hide theme switcher */
+.theme-toggle,
+button[class*="theme"],
+a[class*="theme-toggle"],
+#theme-toggle-button,
+.admin-theme-toggle,
+[data-theme-toggle] {
+  display: none !important;
+}
+
+/* Hide navigation search box */
+#nav-filter {
+  display: none !important;
+}
+
+/* Hide add buttons in sidebar navigation */
+#nav-sidebar .addlink,
+#nav-sidebar a.addlink,
+nav#nav-sidebar .addlink {
+  display: none !important;
+}
+
+/* Hide app section titles in sidebar (ACCOUNTS, UPLOADS, etc.) */
+#nav-sidebar .module caption,
+#nav-sidebar .module h2,
+#nav-sidebar caption,
+#nav-sidebar caption a {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  visibility: hidden !important;
+}
+
+/* ==================== SIDEBAR NAVIGATION - CLEAN STYLE ==================== */
+
+/* Sidebar container - gray-blue background like image */
+#nav-sidebar {
+  background: #2d3748 !important;
+  border-right: none !important;
+  padding: 0.5rem 0 !important;
+  width: 240px !important;
+}
+
+/* Remove all borders and lines from modules */
+#nav-sidebar .module {
+  background: transparent !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Remove borders from tables */
+#nav-sidebar .module table {
+  width: 100% !important;
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+}
+
+#nav-sidebar .module tbody {
+  border: none !important;
+}
+
+/* Individual model rows - NO BORDERS */
+#nav-sidebar .module tr {
+  display: block !important;
+  border: none !important;
+  margin: 0 !important;
+  background: transparent !important;
+}
+
+#nav-sidebar .module th {
+  display: block !important;
+  border: none !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+#nav-sidebar .module td {
+  border: none !important;
+  background: transparent !important;
+}
+
+/* Sidebar links - clean simple style */
+#nav-sidebar a {
+  display: block !important;
+  font-family: var(--font-en) !important; /* English font for sidebar */
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  color: #a0aec0 !important;
+  padding: 0.625rem 1.25rem !important;
+  margin: 0 !important;
+  text-decoration: none !important;
+  transition: all 0.15s ease !important;
+  border: none !important;
+  border-left: 3px solid transparent !important;
+  background: transparent !important;
+  direction: ltr !important; /* Left-to-right for English */
+  text-align: left !important;
+}
+
+/* Hover state - subtle */
+#nav-sidebar a:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #e2e8f0 !important;
+  border-left-color: #10b981 !important;
+}
+
+/* Active/Current model state - ENHANCED */
+/* Only highlight the EXACT current page, not all links in the module */
+#nav-sidebar tr.current-model > th > a,
+#nav-sidebar a[aria-current="page"] {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #10b981 !important;
+  font-weight: 600 !important;
+  border-left-color: #10b981 !important;
+  border-left-width: 4px !important;
+  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.1) !important;
+}
+
+/* Active model - hover */
+#nav-sidebar tr.current-model > th > a:hover,
+#nav-sidebar a[aria-current="page"]:hover {
+  background: rgba(16, 185, 129, 0.25) !important;
+  color: #34d399 !important;
+  border-left-width: 4px !important;
+}
+
+/* Focus state */
+#nav-sidebar a:focus {
+  outline: 2px solid #10b981 !important;
+  outline-offset: -2px !important;
+}
+
+/* Highlight ONLY the current row in sidebar (not the whole module) */
+#nav-sidebar tr.current-model {
+  background: rgba(16, 185, 129, 0.05) !important;
+  border-radius: 0 !important;
+}
+
+/* Remove list styles */
+#nav-sidebar ul {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+#nav-sidebar li {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+/* Scrollbar styling */
+#nav-sidebar {
+  overflow-y: auto !important;
+  max-height: calc(100vh - 60px) !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: #4a5568 #2d3748 !important;
+}
+
+#nav-sidebar::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+#nav-sidebar::-webkit-scrollbar-track {
+  background: #2d3748 !important;
+}
+
+#nav-sidebar::-webkit-scrollbar-thumb {
+  background: #4a5568 !important;
+  border-radius: 3px !important;
+}
+
+#nav-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #718096 !important;
+}
+
+/* Override Django's default light mode variables to dark */
+:root,
+[data-theme="light"],
+[data-theme="auto"] {
+  color-scheme: dark !important;
+}
+
+/* Global font settings */
+body {
+  background: radial-gradient(#1e293b 0%, #0b1220 70%, #070b14 100%) !important;
+  color: var(--text-primary) !important;
+  font-family: var(--font-en) !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  font-weight: 400 !important;
+}
+
+/* Apply appropriate font based on content language */
+body *,
+input,
+textarea,
+select,
+button {
+  font-family: var(--font-en) !important;
+  font-weight: 400 !important;
+}
+
+/* Force English font for Latin text with improved readability */
+.latin,
+:lang(en),
+input[type="text"],
+input[type="email"],
+input[type="url"],
+input[type="password"],
+input[type="number"] {
+  font-family: var(--font-en) !important;
+  letter-spacing: 0.01em !important;
+  font-weight: 400 !important;
+}
+
+/* Persian/Arabic font support with better readability */
+:lang(fa),
+:lang(ar),
+[dir="rtl"] {
+  font-family: var(--font-fa) !important;
+  font-weight: 400 !important;
+}
+
+/* Headings with better hierarchy */
+h1 {
+  font-family: var(--font-en) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.03em !important;
+  font-size: 24px !important;
+}
+
+h2 {
+  font-family: var(--font-en) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em !important;
+  font-size: 20px !important;
+}
+
+h3 {
+  font-family: var(--font-en) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  font-size: 18px !important;
+}
+
+h4,
+h5,
+h6 {
+  font-family: var(--font-en) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  font-size: 16px !important;
+}
+
+/* Improve readability for text elements */
+p {
+  font-family: inherit !important;
+  font-weight: 400 !important;
+  line-height: 1.7 !important;
+  letter-spacing: 0.01em !important;
+}
+
+li {
+  font-family: inherit !important;
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+}
+
+td,
+th {
+  font-family: inherit !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.01em !important;
+}
+
+th {
+  font-weight: 500 !important;
+}
+
+div,
+span {
+  font-family: inherit !important;
+}
+
+/* Labels and form elements with better contrast */
+label,
+.form-row label {
+  font-family: var(--font-en) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+  font-size: 13px !important;
+}
+
+/* Input fields with consistent sizing */
+input,
+textarea,
+select {
+  font-family: var(--font-en) !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Buttons with medium weight for better readability */
+button,
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input {
+  font-family: var(--font-en) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+  font-size: 14px !important;
+}
+
+/* Code and monospace elements */
+code,
+pre,
+.code,
+.monospace {
+  font-family: "SF Mono", "Monaco", "Inconsolata", "Fira Code",
+    "Droid Sans Mono", "Source Code Pro", monospace !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+  letter-spacing: 0 !important;
+}
+
+/* ==================== TYPOGRAPHY ENHANCEMENTS ==================== */
+
+/* Links with better readability */
+a,
+a:link,
+a:visited {
+  font-family: var(--font-en) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease !important;
+}
+
+a:hover {
+  text-decoration: underline !important;
+}
+
+/* Navigation links */
+#nav-sidebar a,
+.module h2 a,
+.breadcrumbs a {
+  font-family: var(--font-en) !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Table action links */
+.action-checkbox-column,
+.action-counter {
+  font-family: var(--font-en) !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+}
+
+/* Help text */
+.help,
+.helptext,
+p.help {
+  font-family: var(--font-en) !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  letter-spacing: 0.01em !important;
+  color: var(--text-muted) !important;
+}
+
+/* Form field descriptions */
+.description {
+  font-family: var(--font-en) !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+}
+
+/* Change list filters */
+#changelist-filter h3,
+#changelist-filter li {
+  font-family: var(--font-en) !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Selector widget */
+.selector h2,
+.selector-available h2,
+.selector-chosen h2 {
+  font-family: var(--font-en) !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  letter-spacing: 0 !important;
+}
+
+/* Dashboard modules */
+#content-main .module h2,
+#content-main .module caption {
+  font-family: var(--font-en) !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Recent actions */
+.module ul.actionlist li {
+  font-family: var(--font-en) !important;
+  font-weight: 400 !important;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Form submit row */
+.submit-row {
+  font-family: var(--font-en) !important;
+}
+
+.submit-row input[type="submit"],
+.submit-row input[type="button"],
+.submit-row button,
+.submit-row a {
+  font-family: var(--font-en) !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* Inline tabular forms */
+.tabular thead th {
+  font-family: var(--font-en) !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+}
+
+.tabular tbody td {
+  font-family: var(--font-en) !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+}
+
+/* Calendar widget */
+.calendarbox caption,
+.calendarbox th {
+  font-family: var(--font-en) !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+}
+
+.calendarbox td {
+  font-family: var(--font-en) !important;
+  font-weight: 400 !important;
+  font-size: 13px !important;
+}
+
+/* Datetime widgets */
+.datetime input {
+  font-family: var(--font-en) !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+}
+
+/* Filter list */
+#changelist-filter li a {
+  font-family: var(--font-en) !important;
+  font-weight: 400 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.01em !important;
+}
+
+#changelist-filter li.selected a {
+  font-weight: 600 !important;
+}
+
+/* Fieldset legends */
+fieldset.module legend,
+fieldset legend {
+  font-family: var(--font-en) !important;
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Action select */
+.actions label,
+.actions select {
+  font-family: var(--font-en) !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+}
+
+/* Sidebar navigation */
+#nav-sidebar .module caption,
+#nav-sidebar .module h2 {
+  font-family: var(--font-en) !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Sidebar links */
+#nav-sidebar a {
+  font-family: var(--font-en) !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Active/Selected state already defined above - no need to repeat */
+
+/* User tools in header */
+#user-tools a {
+  font-family: var(--font-en) !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Colophon (footer) */
+.colophon {
+  font-family: var(--font-en) !important;
+  font-weight: 400 !important;
+  font-size: 12px !important;
+}
+
+/* Related widget wrapper */
+.related-widget-wrapper select,
+.related-widget-wrapper input {
+  font-family: var(--font-en) !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+}
+
+/* Change list search */
+#changelist-search input[type="text"] {
+  font-family: var(--font-en) !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Change list action buttons */
+.actions button,
+.actions input[type="submit"] {
+  font-family: var(--font-en) !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* ==================== PERSIAN/RTL FONT OVERRIDES ==================== */
+
+/* When admin is in Persian/RTL mode */
+html[dir="rtl"] body,
+html[dir="rtl"] input,
+html[dir="rtl"] textarea,
+html[dir="rtl"] select,
+html[dir="rtl"] button,
+html[dir="rtl"] label,
+html[dir="rtl"] h1,
+html[dir="rtl"] h2,
+html[dir="rtl"] h3,
+html[dir="rtl"] h4,
+html[dir="rtl"] h5,
+html[dir="rtl"] h6,
+html[dir="rtl"] p,
+html[dir="rtl"] li,
+html[dir="rtl"] td,
+html[dir="rtl"] th,
+html[dir="rtl"] a {
+  font-family: var(--font-fa) !important;
+  font-weight: 400 !important;
+}
+
+html[dir="rtl"] h1,
+html[dir="rtl"] h2,
+html[dir="rtl"] h3 {
+  font-weight: 700 !important;
+}
+
+html[dir="rtl"] label,
+html[dir="rtl"] th,
+html[dir="rtl"] button,
+html[dir="rtl"] .button {
+  font-weight: 500 !important;
+}
+
+/* Keep English for code/technical fields even in RTL */
+html[dir="rtl"] code,
+html[dir="rtl"] pre,
+html[dir="rtl"] .code,
+html[dir="rtl"] .monospace,
+html[dir="rtl"] input[type="url"],
+html[dir="rtl"] input[type="email"] {
+  font-family: "SF Mono", "Monaco", "Inconsolata", monospace !important;
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+/* ==================== HEADER ==================== */
+
+#header {
+  background: var(--bg-panel) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Hide branding section completely */
+#branding {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+#user-tools {
+  color: var(--text-secondary) !important;
+  font-family: var(--font-fa) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important; /* Space between left and right */
+  gap: 0.5rem !important;
+  direction: ltr !important;
+  padding: 0.25rem 1rem !important;
+  min-height: 32px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Hide "Welcome, username" text that Django adds by default */
+#user-tools::before,
+#user-tools > strong,
+#user-tools > .username {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Admin Title Styling - Left side, larger */
+#user-tools span {
+  font-family: var(--font-en) !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  color: var(--primary) !important;
+  letter-spacing: -0.02em !important;
+  white-space: nowrap !important;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Button container - Left side */
+#user-tools > div {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+/* Admin Buttons - Similar to navbar buttons */
+#user-tools a,
+.admin-btn {
+  font-family: var(--font-en) !important;
+  font-weight: 600 !important;
+  font-size: 0.8rem !important;
+  padding: 0.25rem 0.75rem !important;
+  border-radius: 0.375rem !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap !important;
+  display: inline-block !important;
+  text-transform: none !important;
+}
+
+/* Outline button style (خروج) */
+.admin-btn-outline {
+  background: transparent !important;
+  color: var(--primary) !important;
+  border: 1px solid var(--primary) !important;
+}
+
+.admin-btn-outline:hover {
+  background: var(--primary) !important;
+  color: #001b0f !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Primary button style (تغییر رمز عبور) */
+.admin-btn-primary {
+  background: var(--primary) !important;
+  color: #001b0f !important;
+  border: 1px solid var(--primary) !important;
+}
+
+.admin-btn-primary:hover {
+  background: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4) !important;
+}
+
+/* If header inner wrapper exists in this Django version */
+#header .header-inner,
+#header > div {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* ==================== HEADER FULL-WIDTH FIX ==================== */
+
+/* Force all Django admin containers to full width */
+#container,
+.main,
+#content,
+#content-main {
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Header specifically */
+#header {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+
+/* Ensure #branding and #user-tools don't constrain width */
+#header #branding,
+#header #user-tools {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* If Django wraps header in additional div */
+#header > div,
+#header .header-inner {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* ==================== NAVIGATION ==================== */
+
+.module h2,
+.module caption,
+.inline-group h2 {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+#content-main {
+  background: transparent !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Force change-list pages to be full width, not flex columns */
+.change-list #content-main {
+  display: block !important;
+}
+
+.change-list .coltype,
+.change-list .colM,
+.change-list .flex {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  flex: none !important;
+}
+
+/* ==================== BREADCRUMBS ==================== */
+
+/* Breadcrumb Navigation - Show and Style */
+div.breadcrumbs,
+.breadcrumbs,
+nav[aria-label="Breadcrumbs"] {
+  display: block !important;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+  border-bottom: 2px solid var(--primary) !important;
+  padding: 1rem 2rem !important;
+  margin: 0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+.breadcrumbs a {
+  color: var(--primary) !important;
+  text-decoration: none !important;
+  font-family: var(--font-en) !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  letter-spacing: 0.5px !important;
+  transition: all 0.2s ease !important;
+  padding: 0.25rem 0.5rem !important;
+  border-radius: 0.25rem !important;
+}
+
+.breadcrumbs a:hover {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #2dd4a8 !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Breadcrumb separator (›) */
+.breadcrumbs {
+  color: var(--text-muted) !important;
+  font-size: 14px !important;
+}
+
+/* Current page (last item) */
+.breadcrumbs > :last-child {
+  color: var(--text-primary) !important;
+  font-weight: 700 !important;
+}
+
+/* ==================== MODULES / CARDS ==================== */
+
+.module {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.module table {
+  background: transparent !important;
+}
+
+/* ==================== TABLES ==================== */
+
+#result_list {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.5rem !important;
+  overflow: hidden !important;
+}
+
+#result_list thead th {
+  background: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+  border-bottom: 2px solid var(--border-color) !important;
+  font-weight: 600 !important;
+  font-family: var(--font-en) !important;
+  font-size: 12px !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  padding: 12px 10px !important;
+}
+
+#result_list tbody tr {
+  background: var(--bg-card) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  font-family: var(--font-en) !important;
+}
+
+#result_list tbody td {
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.01em !important;
+  padding: 10px !important;
+  line-height: 1.5 !important;
+}
+
+#result_list tbody tr:hover {
+  background: rgba(16, 185, 129, 0.1) !important;
+}
+
+#result_list tbody tr.selected {
+  background: rgba(16, 185, 129, 0.15) !important;
+}
+
+#result_list tbody td,
+#result_list tbody th {
+  color: var(--text-primary) !important;
+  border-right: 1px solid var(--border-color) !important;
+  font-family: var(--font-en) !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+
+#result_list tbody td a {
+  color: var(--primary) !important;
+}
+
+#result_list tbody td a:hover {
+  color: var(--primary-dark) !important;
+}
+
+/* ==================== FORMS ==================== */
+
+.form-row {
+  background: var(--bg-card) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+label {
+  color: var(--text-secondary) !important;
+  font-weight: 500 !important;
+  font-family: var(--font-en) !important;
+  font-size: 13px !important;
+  letter-spacing: 0.2px !important;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="url"],
+input[type="number"],
+input[type="tel"],
+textarea,
+select {
+  background: var(--bg-dark) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  border-radius: 0.375rem !important;
+  padding: 0.5rem 0.75rem !important;
+  font-family: var(--font-en) !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="url"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+  outline: none !important;
+}
+
+.help {
+  color: var(--text-muted) !important;
+  font-family: var(--font-en) !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+}
+
+/* ==================== BUTTONS ==================== */
+
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input,
+button {
+  background: var(--primary) !important;
+  color: #001b0f !important;
+  border: 1px solid var(--primary) !important;
+  border-radius: 0.375rem !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  font-family: var(--font-en) !important;
+  font-size: 14px !important;
+  letter-spacing: 0.3px !important;
+}
+
+.button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover,
+.submit-row input:hover,
+button:hover {
+  background: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+  transform: translateY(-1px) !important;
+}
+
+.button:active,
+input[type="submit"]:active,
+input[type="button"]:active,
+.submit-row input:active,
+button:active {
+  transform: translateY(0) !important;
+}
+
+/* Delete button */
+.deletelink,
+.deletelink-box {
+  background: #ef4444 !important;
+  color: white !important;
+  border-color: #dc2626 !important;
+}
+
+.deletelink:hover,
+.deletelink-box:hover {
+  background: #dc2626 !important;
+}
+
+/* Default button (cancel, etc) */
+.default {
+  background: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.default:hover {
+  background: var(--bg-card) !important;
+}
+
+/* ==================== CHANGE LIST ==================== */
+
+/* Force full-width layout (no two-column with filters) */
+#changelist {
+  background: transparent !important;
+  display: block !important;
+  width: 100% !important;
+}
+
+#changelist.filtered {
+  display: block !important;
+}
+
+/* Hide filter sidebar */
+#changelist-filter,
+nav[aria-labelledby="changelist-filter-header"] {
+  display: none !important;
+}
+
+/* ==================== CHANGE LIST TOOLBAR FULL WIDTH FIX ==================== */
+
+/* Ensure content column uses full width */
+.change-list #content,
+.change-list #content-main {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Some Django versions constrain the changelist toolbars via floats/inline sizing */
+.change-list #changelist .search-toolbar,
+.change-list #changelist .actions-toolbar,
+.change-list #changelist .date-toolbar,
+.change-list #changelist #toolbar,
+.change-list #changelist .toolbar {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  float: none !important;
+  clear: both !important;
+}
+
+/* Make sure the search form row stretches too */
+.change-list .search-toolbar #changelist-search,
+.change-list .search-toolbar #changelist-search > div {
+  width: 100% !important;
+}
+
+/* ==================== SEARCH BAR & TOOLBAR ==================== */
+
+/* Main changelist module */
+#changelist {
+  background: transparent !important;
+}
+
+/* Combined search and actions toolbar */
+.search-actions-toolbar {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.5rem !important;
+  padding: 0.75rem !important;
+  margin-bottom: 1rem !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  min-height: 48px !important;
+}
+
+/* Search wrapper - keeps search compact */
+.search-wrapper {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  min-width: 320px !important;
+  max-width: 400px !important;
+}
+
+/* Actions wrapper - keeps delete button compact */
+.actions-wrapper {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Individual toolbars - each with card styling (for backwards compatibility) */
+.search-toolbar,
+.actions-toolbar,
+.date-toolbar {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.5rem !important;
+  padding: 0.75rem !important;
+  margin-bottom: 1rem !important;
+}
+
+/* Actions toolbar - special layout for containing actions + Add button */
+.actions-toolbar {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.75rem !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+  padding: 0.5rem 0.75rem !important;
+  box-sizing: border-box !important;
+}
+
+/* Force actions-toolbar override */
+form.actions,
+.actions-toolbar form.actions {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.75rem !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+  padding: 0.5rem 0.75rem !important;
+  box-sizing: border-box !important;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
+/* Legacy toolbar support (if still used anywhere) */
+.toolbar {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.5rem !important;
+  padding: 0.75rem !important;
+  margin-bottom: 1rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0.75rem !important;
+}
+
+/* Search form in toolbar */
+#changelist-search {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  width: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+#changelist-search label {
+  display: none !important;
+}
+
+#searchbar {
+  background: var(--bg-dark) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  border-radius: 0.375rem !important;
+  padding: 0.5rem 0.75rem !important;
+  width: 250px !important;
+  font-size: 14px !important;
+}
+
+#searchbar:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+  outline: none !important;
+}
+
+#changelist-search input[type="submit"] {
+  padding: 0.5rem 1rem !important;
+  font-size: 14px !important;
+  white-space: nowrap !important;
+  background: var(--primary) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 0.375rem !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+#changelist-search input[type="submit"]:hover {
+  background: var(--primary-dark) !important;
+}
+
+/* Actions - positioned in toolbar next to search */
+.actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  flex: 0 0 auto !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 38px !important;
+  line-height: 38px !important;
+}
+
+/* Actions wrapper for better control */
+.actions-wrapper .actions,
+.search-actions-toolbar .actions {
+  margin: 0 !important;
+}
+
+/* Hide the default action dropdown and Go button */
+.actions label,
+.actions select,
+.actions .button,
+.actions button[name="index"],
+.actions input[type="submit"] {
+  display: none !important;
+}
+
+/* Hide the "0 of 4 selected" text */
+.actions span.action-counter,
+.actions .action-counter,
+.action-counter {
+  display: none !important;
+}
+
+/* Show only the delete button we create with JS */
+.actions .delete-selected-btn {
+  display: inline-flex !important;
+}
+
+/* Delete button - direct child of form, not wrapped */
+.delete-selected-btn {
+  background: #dc2626 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 0.375rem !important;
+  padding: 0 1rem !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  white-space: nowrap !important;
+  height: 32px !important;
+  line-height: 32px !important;
+  flex-shrink: 0 !important;
+  align-self: center !important;
+  margin: 0 !important;
+  vertical-align: middle !important;
+  box-sizing: border-box !important;
+}
+
+.delete-selected-btn:hover {
+  background: #b91c1c !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.3) !important;
+}
+
+.delete-selected-btn:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 4px -1px rgba(220, 38, 38, 0.3) !important;
+}
+
+.delete-selected-btn:disabled {
+  background: #6b7280 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
+}
+
+.delete-selected-btn::before {
+  content: "🗑️";
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Counter text */
+.action-counter {
+  font-size: 13px !important;
+  color: var(--text-secondary) !important;
+  display: inline-block !important;
+  margin-left: 0.5rem !important;
+}
+
+/* Results table - appears directly below toolbar */
+#changelist-form {
+  margin-top: 0 !important;
+  width: 100% !important;
+}
+
+/* Table container with horizontal scroll */
+#changelist .results {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.5rem !important;
+  margin-top: 0 !important;
+  width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  /* Smooth scrolling */
+  scroll-behavior: smooth !important;
+  /* Custom scrollbar for dark theme */
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--border-color) var(--bg-dark) !important;
+}
+
+/* Webkit scrollbar styling */
+#changelist .results::-webkit-scrollbar {
+  height: 8px !important;
+}
+
+#changelist .results::-webkit-scrollbar-track {
+  background: var(--bg-dark) !important;
+  border-radius: 4px !important;
+}
+
+#changelist .results::-webkit-scrollbar-thumb {
+  background: var(--border-color) !important;
+  border-radius: 4px !important;
+}
+
+#changelist .results::-webkit-scrollbar-thumb:hover {
+  background: var(--primary) !important;
+}
+
+/* Ensure table has minimum width for horizontal scroll */
+#changelist .results table {
+  min-width: max-content !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+/* Sticky table header */
+#changelist .results thead th {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+  background: var(--bg-panel) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Date hierarchy - appears in toolbar */
+.xfull {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  flex: 0 0 auto !important;
+}
+
+.xfull a {
+  background: var(--bg-dark) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  border-radius: 0.375rem !important;
+  padding: 0.5rem 0.75rem !important;
+  text-decoration: none !important;
+  font-size: 14px !important;
+  display: inline-block !important;
+}
+
+.xfull a:hover {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+}
+
+/* Make the search form itself look like the surrounding card (fixes the big inner dark box) */
+.search-toolbar #changelist-search,
+.search-toolbar form#changelist-search,
+.search-actions-toolbar #changelist-search,
+.search-actions-toolbar form#changelist-search,
+.search-wrapper #changelist-search,
+.search-wrapper form#changelist-search {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+}
+
+/* If any inner wrapper/div/fieldset is getting a background/border, force it off */
+.search-toolbar #toolbar,
+.search-toolbar #toolbar > div,
+.search-toolbar #changelist-search > div,
+.search-toolbar #changelist-search fieldset,
+.search-toolbar #changelist-search .form-row,
+.search-toolbar #changelist-search .fieldBox,
+.search-toolbar #changelist-search .search-container,
+.search-actions-toolbar #toolbar,
+.search-actions-toolbar #toolbar > div,
+.search-actions-toolbar #changelist-search > div,
+.search-actions-toolbar #changelist-search fieldset,
+.search-actions-toolbar #changelist-search .form-row,
+.search-actions-toolbar #changelist-search .fieldBox,
+.search-actions-toolbar #changelist-search .search-container,
+.search-wrapper #toolbar,
+.search-wrapper #toolbar > div,
+.search-wrapper #changelist-search > div,
+.search-wrapper #changelist-search fieldset,
+.search-wrapper #changelist-search .form-row,
+.search-wrapper #changelist-search .fieldBox,
+.search-wrapper #changelist-search .search-container {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Ensure the clear button area doesn't create a big dark block */
+.search-toolbar #changelist-search .clear,
+.search-toolbar #changelist-search .clear a,
+.search-toolbar #changelist-search .clear button,
+.search-toolbar #changelist-search a.clear,
+.search-toolbar #changelist-search button.clear,
+.search-actions-toolbar #changelist-search .clear,
+.search-actions-toolbar #changelist-search .clear a,
+.search-actions-toolbar #changelist-search .clear button,
+.search-actions-toolbar #changelist-search a.clear,
+.search-actions-toolbar #changelist-search button.clear,
+.search-wrapper #changelist-search .clear,
+.search-wrapper #changelist-search .clear a,
+.search-wrapper #changelist-search .clear button,
+.search-wrapper #changelist-search a.clear,
+.search-wrapper #changelist-search button.clear {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ==================== SEARCH BAR & TOOLBAR - HARD OVERRIDES ==================== */
+
+/* Django adds inner wrappers in the search form; force them to match the card */
+.search-toolbar #changelist-search,
+.search-toolbar #changelist-search * {
+  box-shadow: none !important;
+}
+
+.search-toolbar #changelist-search,
+.search-toolbar #changelist-search > div,
+.search-toolbar #changelist-search .form-row,
+.search-toolbar #changelist-search .search-container,
+.search-toolbar #changelist-search fieldset,
+.search-toolbar #changelist-search .fieldBox {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Remove any default background images/gradients on the search form */
+.search-toolbar #changelist-search {
+  background-image: none !important;
+}
+
+/* If the clear icon is rendered as a link with background, neutralize it */
+.search-toolbar #changelist-search a,
+.search-toolbar #changelist-search button {
+  background-image: none !important;
+}
+
+/* ==================== SEARCH TOOLBAR - MATCH ACTIONS BOX ==================== */
+
+/* Django wraps search in an extra #toolbar div; make it transparent so it doesn't look like a nested panel */
+.search-toolbar #toolbar {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Also neutralize possible pseudo-elements that create dark bars */
+.search-toolbar #toolbar::before,
+.search-toolbar #toolbar::after,
+.search-toolbar #changelist-search::before,
+.search-toolbar #changelist-search::after {
+  content: none !important;
+}
+
+/* Keep the search form itself unboxed (like actions row) */
+.search-toolbar #changelist-search {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+}
+
+/* The inner DIV should not introduce a background/border */
+.search-toolbar #changelist-search > div {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  width: 100% !important;
+}
+
+/* Search icon wrapper should not create a dark block */
+.search-toolbar #changelist-search label {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Make the search submit button match the "Go" style */
+.search-toolbar #changelist-search input[type="submit"] {
+  background: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.375rem !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 600 !important;
+}
+
+.search-toolbar #changelist-search input[type="submit"]:hover {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+}
+
+/* ==================== PAGINATION ==================== */
+
+.paginator {
+  color: var(--text-secondary) !important;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.5rem !important;
+  padding: 0.75rem 1rem !important;
+  margin-top: 1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  flex-wrap: wrap !important;
+}
+
+.paginator a:link,
+.paginator a:visited {
+  background: var(--bg-panel) !important;
+  color: var(--primary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.25rem !important;
+  padding: 0.25rem 0.5rem !important;
+}
+
+.paginator a:hover {
+  background: var(--primary) !important;
+  color: #001b0f !important;
+  border-color: var(--primary) !important;
+}
+
+/* ==================== MESSAGES ==================== */
+
+.messagelist {
+  margin: 0 0 1rem 0 !important;
+  padding: 0 !important;
+}
+
+.messagelist li {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.5rem !important;
+  color: var(--text-primary) !important;
+  padding: 0.75rem 1rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.messagelist .success {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border-color: var(--primary) !important;
+}
+
+.messagelist .warning {
+  background: rgba(245, 158, 11, 0.1) !important;
+  border-color: #f59e0b !important;
+}
+
+.messagelist .error {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border-color: #ef4444 !important;
+}
+
+/* ==================== LOGIN PAGE ==================== */
+
+.login {
+  background: radial-gradient(#1e293b 0%, #0b1220 70%, #070b14 100%) !important;
+}
+
+.login #container {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.35) !important;
+}
+
+.login #content {
+  background: transparent !important;
+}
+
+.login .form-row {
+  background: transparent !important;
+  border: none !important;
+}
+
+.login .form-row label {
+  color: var(--text-secondary) !important;
+}
+
+/* ==================== SIDEBAR ==================== */
+
+#content-related {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.5rem !important;
+}
+
+#content-related h3 {
+  background: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+#content-related a {
+  color: var(--primary) !important;
+}
+
+#content-related a:hover {
+  color: var(--primary-dark) !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+}
+
+/* ==================== DASHBOARD ==================== */
+
+/* Hide dashboard title and recent actions */
+#content h1,
+.dashboard #content h1,
+.dashboard .module:last-child,
+#recent-actions-module,
+.module#recent-actions-module {
+  display: none !important;
+}
+
+/* Hide sidebar on dashboard */
+.dashboard #content-related {
+  display: none !important;
+}
+
+/* Adjust dashboard layout */
+.dashboard #content-main {
+  padding-top: 1rem !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+#content-main .module table {
+  background: transparent !important;
+}
+
+#content-main .module th {
+  background: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+}
+
+#content-main .module td {
+  color: var(--text-primary) !important;
+}
+
+#content-main .module tr:hover {
+  background: rgba(16, 185, 129, 0.05) !important;
+}
+
+/* ==================== ACTION CHECKBOXES ==================== */
+
+input[type="checkbox"] {
+  accent-color: var(--primary) !important;
+}
+
+/* ==================== DATE/TIME WIDGETS ==================== */
+
+.calendarbox,
+.clockbox {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.calendar caption,
+.calendarbox h2 {
+  background: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+}
+
+.calendar th {
+  background: var(--bg-panel) !important;
+  color: var(--text-secondary) !important;
+}
+
+.calendar td {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.calendar td a {
+  color: var (--primary) !important;
+}
+
+.calendar td a:hover {
+  background: var(--primary) !important;
+  color: #001b0f !important;
+}
+
+/* ==================== INLINE FORMS ==================== */
+
+.inline-group {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.5rem !important;
+}
+
+.inline-related {
+  background: transparent !important;
+}
+
+.inline-related h3 {
+  background: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ==================== ERRORS ==================== */
+
+.errornote {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border: 1px solid #ef4444 !important;
+  color: #fca5a5 !important;
+  border-radius: 0.5rem !important;
+}
+
+.errorlist {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border: 1px solid #ef4444 !important;
+  color: #fca5a5 !important;
+  border-radius: 0.375rem !important;
+}
+
+ul.errorlist {
+  margin: 0.5rem 0 !important;
+  padding: 0.5rem 1rem !important;
+}
+
+.errors {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border-left: 3px solid #ef4444 !important;
+}
+
+/* ==================== OBJECT TOOLS (Add Buttons) ==================== */
+
+/* Move Add buttons inside the actions toolbar */
+.object-tools {
+  background: transparent !important;
+  margin: 0 !important;
+  margin-left: auto !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  list-style: none !important;
+  vertical-align: middle !important;
+  height: 32px !important;
+  line-height: 32px !important;
+  flex-shrink: 0 !important;
+  align-self: center !important;
+}
+
+/* Object tools in new combined toolbar */
+.search-actions-toolbar .object-tools {
+  margin-left: auto !important;
+}
+
+.object-tools li {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-block !important;
+  height: 32px !important;
+  line-height: 32px !important;
+}
+
+.object-tools li a {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.375rem !important;
+  background: var(--primary) !important;
+  color: #001b0f !important;
+  border: 1px solid var(--primary) !important;
+  border-radius: 0.375rem !important;
+  padding: 0 1rem !important;
+  font-family: var(--font-en) !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  text-transform: none !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap !important;
+  height: 32px !important;
+  line-height: 32px !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+  align-self: center !important;
+  margin: 0 !important;
+  vertical-align: middle !important;
+}
+
+.object-tools li a:hover {
+  background: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+  text-decoration: none !important;
+}
+
+/* Icon styling in Add buttons */
+.object-tools li a::before {
+  content: "+" !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+}
+
+/* Hide Add button in toolbar for LicenseCode page (has inline form instead) */
+.model-licensecode.change-list .actions-toolbar .object-tools,
+.model-licensecode.change-list .search-actions-toolbar .object-tools {
+  display: none !important;
+}
+
+/* Hide Add button in toolbar for Role page (has inline form instead) */
+.model-role.change-list .actions-toolbar .object-tools,
+.model-role.change-list .search-actions-toolbar .object-tools {
+  display: none !important;
+}
+
+/* Hide Add button in toolbar for Group page (has inline form instead) */
+.model-group.change-list .object-tools,
+.model-group.change-list .actions-toolbar .object-tools,
+.model-group.change-list .search-actions-toolbar .object-tools {
+  display: none !important;
+}
+
+/* ==================== FIX HORIZONTAL SCROLL - Role ==================== */
+/* Prevent horizontal scroll on all containers */
+.model-role.change-list,
+.model-role.change-list body,
+.model-role.change-list html,
+.model-role.change-list #container,
+.model-role.change-list #content,
+.model-role.change-list #content-main,
+.model-role.change-list #changelist,
+.model-role.change-list .module {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Make table responsive with internal scroll only */
+.model-role.change-list .results {
+  overflow-x: auto !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+.model-role.change-list #result_list {
+  width: 100% !important;
+  table-layout: auto !important;
+}
+
+/* Fix toolbar widths */
+.model-role.change-list .search-toolbar,
+.model-role.change-list .actions-toolbar {
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+/* Hide Add button in toolbar for User page (has inline form instead) */
+.model-user.change-list .actions-toolbar .object-tools {
+  display: none !important;
+}
+
+/* ==================== FIX HORIZONTAL SCROLL - User ==================== */
+/* Prevent horizontal scroll on all containers */
+.model-user.change-list,
+.model-user.change-list body,
+.model-user.change-list html,
+.model-user.change-list #container,
+.model-user.change-list #content,
+.model-user.change-list #content-main,
+.model-user.change-list #changelist,
+.model-user.change-list .module {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Make table responsive with internal scroll only */
+.model-user.change-list .results {
+  overflow-x: auto !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+.model-user.change-list #result_list {
+  width: 100% !important;
+  table-layout: auto !important;
+}
+
+/* Fix toolbar widths */
+.model-user.change-list .search-toolbar,
+.model-user.change-list .actions-toolbar {
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+/* Fix filter sidebar */
+.model-user.change-list #changelist-filter {
+  max-width: 240px !important;
+  overflow-x: hidden !important;
+}
+
+/* Hide Add button in toolbar for TokenProxy page (has inline form instead) */
+.model-tokenproxy.change-list .actions-toolbar .object-tools {
+  display: none !important;
+}
+
+/* Hide Add button in toolbar for UploadedFile page (file upload handled elsewhere) */
+.model-uploadedfile.change-list .actions-toolbar .object-tools {
+  display: none !important;
+}
+
+/* ==================== FIX HORIZONTAL SCROLL - UploadedFile ==================== */
+/* Prevent horizontal scroll on all containers */
+.model-uploadedfile.change-list,
+.model-uploadedfile.change-list body,
+.model-uploadedfile.change-list html,
+.model-uploadedfile.change-list #container,
+.model-uploadedfile.change-list #content,
+.model-uploadedfile.change-list #content-main,
+.model-uploadedfile.change-list #changelist,
+.model-uploadedfile.change-list .module {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Make table responsive with internal scroll only */
+.model-uploadedfile.change-list .results {
+  overflow-x: auto !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+.model-uploadedfile.change-list #result_list {
+  width: 100% !important;
+  table-layout: auto !important;
+}
+
+/* Fix toolbar widths */
+.model-uploadedfile.change-list .search-toolbar,
+.model-uploadedfile.change-list .actions-toolbar {
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+/* Fix filter sidebar */
+.model-uploadedfile.change-list #changelist-filter {
+  max-width: 240px !important;
+  overflow-x: hidden !important;
+}
+
+/* Hide Add button in toolbar for DiscoveredProcessModel page (models are auto-discovered) */
+.model-discoveredprocessmodel.change-list .actions-toolbar .object-tools {
+  display: none !important;
+}
+
+/* Remove empty space on right side when Add button is hidden for DiscoveredProcessModel */
+.model-discoveredprocessmodel.change-list .actions-toolbar,
+.model-discoveredprocessmodel.change-list form.actions {
+  justify-content: flex-start !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* ==================== FIX HORIZONTAL SCROLL - DiscoveredProcessModel ==================== */
+/* Prevent horizontal scroll on all containers */
+.model-discoveredprocessmodel.change-list,
+.model-discoveredprocessmodel.change-list body,
+.model-discoveredprocessmodel.change-list html,
+.model-discoveredprocessmodel.change-list #container,
+.model-discoveredprocessmodel.change-list #content,
+.model-discoveredprocessmodel.change-list #content-main,
+.model-discoveredprocessmodel.change-list #changelist,
+.model-discoveredprocessmodel.change-list .module {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Make table responsive with internal scroll only */
+.model-discoveredprocessmodel.change-list .results {
+  overflow-x: auto !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+.model-discoveredprocessmodel.change-list #result_list {
+  width: 100% !important;
+  table-layout: auto !important;
+}
+
+/* Fix toolbar widths */
+.model-discoveredprocessmodel.change-list .search-toolbar,
+.model-discoveredprocessmodel.change-list .actions-toolbar {
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+/* Fix filter sidebar */
+.model-discoveredprocessmodel.change-list #changelist-filter {
+  max-width: 240px !important;
+  overflow-x: hidden !important;
+}
+
+/* ==================== EVENTLOG - HIDE ADD BUTTON ==================== */
+/* Hide "Add Event Log" button (logs are uploaded through main app) */
+.model-eventlog.change-list .actions-toolbar .object-tools {
+  display: none !important;
+}
+
+/* Remove empty space on right side when Add button is hidden for EventLog */
+.model-eventlog.change-list .actions-toolbar,
+.model-eventlog.change-list form.actions {
+  justify-content: flex-start !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* ==================== FIX HORIZONTAL SCROLL - EventLog ==================== */
+/* Prevent horizontal scroll on all containers */
+.model-eventlog.change-list,
+.model-eventlog.change-list body,
+.model-eventlog.change-list html,
+.model-eventlog.change-list #container,
+.model-eventlog.change-list #content,
+.model-eventlog.change-list #content-main,
+.model-eventlog.change-list #changelist,
+.model-eventlog.change-list .module {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Make table responsive with internal scroll only */
+.model-eventlog.change-list .results {
+  overflow-x: auto !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+.model-eventlog.change-list #result_list {
+  width: 100% !important;
+  table-layout: auto !important;
+}
+
+/* Fix toolbar widths */
+.model-eventlog.change-list .search-toolbar,
+.model-eventlog.change-list .actions-toolbar {
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+/* Fix filter sidebar */
+.model-eventlog.change-list #changelist-filter {
+  max-width: 240px !important;
+  overflow-x: hidden !important;
+}
+
+/* ==================== FIX HORIZONTAL SCROLL - EventLogJob ==================== */
+/* Prevent horizontal scroll on all containers */
+.model-eventlogjob.change-list,
+.model-eventlogjob.change-list body,
+.model-eventlogjob.change-list html,
+.model-eventlogjob.change-list #container,
+.model-eventlogjob.change-list #content,
+.model-eventlogjob.change-list #content-main,
+.model-eventlogjob.change-list #changelist,
+.model-eventlogjob.change-list .module {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Make table responsive with internal scroll only */
+.model-eventlogjob.change-list .results {
+  overflow-x: auto !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+.model-eventlogjob.change-list #result_list {
+  width: 100% !important;
+  table-layout: auto !important;
+}
+
+/* Fix toolbar widths */
+.model-eventlogjob.change-list .search-toolbar,
+.model-eventlogjob.change-list .actions-toolbar {
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+/* Fix filter sidebar */
+.model-eventlogjob.change-list #changelist-filter {
+  max-width: 240px !important;
+  overflow-x: hidden !important;
+}
+
+/* ==================== FIX HORIZONTAL SCROLL - Translation ==================== */
+/* Prevent horizontal scroll on all containers */
+.model-translation.change-list,
+.model-translation.change-list body,
+.model-translation.change-list html,
+.model-translation.change-list #container,
+.model-translation.change-list #content,
+.model-translation.change-list #content-main,
+.model-translation.change-list #changelist,
+.model-translation.change-list .module {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Make table responsive with internal scroll only */
+.model-translation.change-list .results {
+  overflow-x: auto !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+.model-translation.change-list #result_list {
+  width: 100% !important;
+  table-layout: auto !important;
+}
+
+/* Fix toolbar widths */
+.model-translation.change-list .search-toolbar,
+.model-translation.change-list .actions-toolbar {
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+/* ==================== FOOTER ==================== */
+
+#footer {
+  background: var(--bg-panel) !important;
+  border-top: 1px solid var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+/* ==================== SCROLLBAR ==================== */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* ==================== SELECT2 (if used) ==================== */
+
+.select2-container--admin-autocomplete .select2-selection--single,
+.select2-container--admin-autocomplete .select2-selection--multiple {
+  background: var(--bg-dark) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.select2-container--admin-autocomplete .select2-results__option--highlighted {
+  background: var(--primary) !important;
+  color: #001b0f !important;
+}
+
+.select2-dropdown {
+  background: var(--bg-card) !important;
+  border: 1px solid var (--border-color) !important;
+}
+
+.select2-results__option {
+  color: var(--text-primary) !important;
+}
+
+/* ==================== SVG ICONS & THEME FIXES ==================== */
+
+/* Fix all SVG icons to match dark theme */
+svg,
+.icon,
+.svg-icon,
+img[src*=".svg"] {
+  filter: brightness(0.9) saturate(1.2);
+}
+
+/* Green icons for primary actions */
+.addlink svg,
+.addlink .icon,
+a.addlink svg,
+.object-tools a svg {
+  filter: brightness(1.2) saturate(1.5) hue-rotate(-10deg);
+}
+
+/* Override Django's theme toggle button styles */
+.toggle-theme,
+#toggle-theme,
+button.toggle-theme,
+a.toggle-theme {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Fix header icons (home, change password, etc) */
+#user-tools svg,
+#user-tools .icon {
+  filter: brightness(1.2);
+}
+
+/* Ensure moon/sun icons are hidden */
+svg[class*="moon"],
+svg[class*="sun"],
+.icon-moon,
+.icon-sun,
+[data-icon*="moon"],
+[data-icon*="sun"] {
+  display: none !important;
+}
+
+/* Fix contrast for dark backgrounds */
+.contrast {
+  filter: brightness(1.2) contrast(1.1);
+}

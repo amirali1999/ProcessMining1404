@@ -1,0 +1,222 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block content %}
+<!-- Section 1: Manage Groups -->
+<div style="margin-bottom: 2.5rem;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 0.5rem; overflow: hidden;">
+        <!-- Section Header -->
+        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 1rem 1.5rem; border-bottom: 2px solid var(--primary);">
+            <h2 style="color: var(--primary); font-size: 20px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.75rem; letter-spacing: 0.5px;">
+                <span style="font-size: 24px;">👥</span>
+                Manage Groups
+            </h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin: 0.5rem 0 0 2.25rem;">
+                View and manage permission groups for users
+            </p>
+        </div>
+        
+        <!-- Content from parent template (search, filters, table) -->
+        <div style="padding: 0;">
+            {{ block.super }}
+        </div>
+    </div>
+</div>
+
+<!-- Section 2: Add New Group -->
+<div style="margin-bottom: 2rem;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 0.5rem; overflow: hidden;">
+        <!-- Section Header -->
+        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 1rem 1.5rem; border-bottom: 2px solid var(--primary);">
+            <h2 style="color: var(--primary); font-size: 20px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.75rem; letter-spacing: 0.5px;">
+                <span style="font-size: 24px;">➕</span>
+                Add New Group
+            </h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin: 0.5rem 0 0 2.25rem;">
+                Create a new permission group
+            </p>
+        </div>
+        
+        <!-- Form Container -->
+        <div style="padding: 2rem;">
+            <form method="post" action="{% url 'admin:auth_group_add' %}">
+                {% csrf_token %}
+                
+                <!-- Group Name Field -->
+                <div style="margin-bottom: 2rem;">
+                    <label for="id_name" style="display: block; color: var(--text-secondary); font-weight: 600; font-size: 14px; margin-bottom: 0.625rem;">
+                        Group Name <span style="color: #ef4444; font-weight: 700;">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        name="name" 
+                        id="id_name" 
+                        required
+                        maxlength="150"
+                        placeholder="Enter group name (e.g., Editors, Viewers, Managers)"
+                        style="width: 100%; max-width: 600px; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 0.5rem; padding: 0.875rem 1.25rem; font-size: 15px; font-weight: 500; transition: all 0.2s ease;"
+                    />
+                    <small style="display: block; color: var(--text-muted); font-size: 12px; margin-top: 0.625rem; line-height: 1.5;">
+                        📝 Maximum 150 characters
+                    </small>
+                </div>
+                
+                <!-- Info Box -->
+                <div style="margin-bottom: 2rem; padding: 1.25rem; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 0.5rem;">
+                    <div style="display: flex; align-items: start; gap: 0.75rem;">
+                        <span style="font-size: 20px; flex-shrink: 0; margin-top: 2px;">💡</span>
+                        <div>
+                            <p style="color: var(--text-primary); font-weight: 600; font-size: 14px; margin: 0 0 0.5rem 0;">
+                                Group Guidelines
+                            </p>
+                            <ul style="color: var(--text-muted); font-size: 13px; margin: 0; padding-left: 1.25rem; line-height: 1.7;">
+                                <li>Groups help organize users with <strong>similar permissions</strong></li>
+                                <li>After creating a group, you can assign <strong>specific permissions</strong> to it</li>
+                                <li>Users can belong to <strong>multiple groups</strong></li>
+                                <li>Group names should be <strong>descriptive</strong> (e.g., "Content Editors", "Report Viewers")</li>
+                                <li>Permissions assigned to a group apply to <strong>all users</strong> in that group</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Submit Buttons -->
+                <div style="display: flex; flex-wrap: wrap; gap: 0.875rem; padding-top: 1.25rem; border-top: 2px solid var(--border-color);">
+                    <button 
+                        type="submit" 
+                        name="_save"
+                        style="background: var(--primary); color: #001b0f; border: none; border-radius: 0.5rem; padding: 0.75rem 2rem; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.625rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);"
+                        onmouseover="this.style.background='var(--primary-dark)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)'"
+                        onmouseout="this.style.background='var(--primary)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(16, 185, 129, 0.3)'"
+                    >
+                        <span style="font-size: 18px;">💾</span>
+                        <span>Save</span>
+                    </button>
+                    
+                    <button 
+                        type="submit" 
+                        name="_addanother"
+                        style="background: transparent; color: var(--primary); border: 2px solid var(--primary); border-radius: 0.5rem; padding: 0.75rem 1.75rem; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.625rem;"
+                        onmouseover="this.style.background='rgba(16, 185, 129, 0.1)'; this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.background='transparent'; this.style.transform='translateY(0)'"
+                    >
+                        <span style="font-size: 18px;">➕</span>
+                        <span>Save and add another</span>
+                    </button>
+                    
+                    <button 
+                        type="submit" 
+                        name="_continue"
+                        style="background: transparent; color: var(--text-secondary); border: 2px solid var(--border-color); border-radius: 0.5rem; padding: 0.75rem 1.75rem; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.625rem;"
+                        onmouseover="this.style.borderColor='var(--text-secondary)'; this.style.background='rgba(203, 213, 225, 0.05)'; this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.borderColor='var(--border-color)'; this.style.background='transparent'; this.style.transform='translateY(0)'"
+                    >
+                        <span style="font-size: 18px;">✏️</span>
+                        <span>Save and continue editing</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ==================== GROUP PAGE LAYOUT ==================== */
+
+/* Ensure vertical stack layout */
+.model-group.change-list #content-main {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+}
+
+/* Remove side-by-side layout issues */
+.model-group.change-list #content-main > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+}
+
+/* Section spacing */
+.model-group.change-list #changelist {
+    margin-bottom: 0 !important;
+}
+
+/* Input field focus states */
+#id_name:focus {
+    outline: none !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15) !important;
+    transform: translateY(-1px);
+}
+
+/* Input field styling */
+#id_name {
+    font-weight: 500;
+}
+
+#id_name::placeholder {
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+/* Button hover effects */
+button[type="submit"]:active {
+    transform: scale(0.97) !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    /* Stack buttons vertically on mobile */
+    form > div:last-of-type {
+        flex-direction: column !important;
+    }
+    
+    form > div:last-of-type button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+    
+    /* Full width input on mobile */
+    #id_name {
+        max-width: 100% !important;
+    }
+}
+
+/* Section headers gradient enhancement */
+.model-group.change-list h2 {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Smooth scroll behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Label hover effects */
+label[for="id_name"]:hover {
+    color: var(--primary);
+    transition: color 0.2s ease;
+}
+
+/* Info box icon animation */
+.model-group.change-list div[style*="rgba(59, 130, 246"] span:first-child {
+    animation: gentlePulse 3s ease-in-out infinite;
+}
+
+@keyframes gentlePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Input validation styling */
+#id_name:invalid:not(:focus):not(:placeholder-shown) {
+    border-color: #ef4444;
+}
+
+#id_name:valid:not(:focus):not(:placeholder-shown) {
+    border-color: var(--primary);
+}
+</style>
+
+{% endblock %}

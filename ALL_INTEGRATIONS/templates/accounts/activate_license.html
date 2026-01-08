@@ -1,0 +1,367 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>فعال‌سازی لایسنس پرمیوم</title>
+    <style>
+      :root {
+        --bg-workspace: #0f172a; /* slate-900 */
+        --bg-panel: #111827; /* gray-900 */
+        --bg-card: #1e293b; /* slate-800 */
+        --border-color: #1f2937; /* gray-800 */
+        --text-primary: #e5e7eb; /* gray-200 */
+        --text-secondary: #94a3b8; /* slate-400 */
+        --text-muted: #64748b; /* slate-500 */
+        --primary: #10b981; /* emerald-500 */
+        --primary-dark: #059669; /* emerald-600 */
+        --primary-darker: #047857; /* emerald-700 */
+        --danger: #ef4444; /* red-500 */
+        --warning: #f59e0b; /* amber-500 */
+        --success: #10b981; /* emerald-500 */
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: var(--bg-workspace);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        color: var(--text-primary);
+      }
+
+      .container {
+        background: var(--bg-panel);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        max-width: 600px;
+        width: 100%;
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-darker) 100%);
+        color: white;
+        padding: 40px 30px;
+        text-align: center;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .header h1 {
+        font-size: 32px;
+        margin-bottom: 10px;
+        font-weight: 600;
+      }
+
+      .header .crown {
+        font-size: 60px;
+        display: block;
+        margin-bottom: 10px;
+        animation: bounce 2s infinite;
+      }
+
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      .content {
+        padding: 40px 30px;
+        background: var(--bg-card);
+      }
+
+      .current-plan {
+        background: var(--bg-panel);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        border-left: 4px solid var(--warning);
+        border: 1px solid var(--border-color);
+      }
+
+      .current-plan h3 {
+        color: var(--text-primary);
+        margin-bottom: 15px;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .limitations {
+        list-style: none;
+      }
+
+      .limitations li {
+        padding: 8px 0;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+      }
+
+      .limitations li::before {
+        content: "⚠️";
+        margin-left: 10px;
+      }
+
+      .limitations li strong {
+        color: var(--text-primary);
+        margin-right: 5px;
+      }
+
+      .form-group {
+        margin-bottom: 25px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 16px;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 18px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-family: monospace;
+        transition: all 0.3s;
+        background: var(--bg-panel);
+        color: var(--text-primary);
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+      }
+
+      .form-group .help-text {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 8px;
+      }
+
+      .error {
+        background: rgba(239, 68, 68, 0.1);
+        color: #fca5a5;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border-left: 4px solid var(--danger);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+      }
+
+      .error ul {
+        margin: 0;
+        padding: 0 20px;
+        color: #fca5a5;
+      }
+
+      .btn-upgrade {
+        width: 100%;
+        padding: 18px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-darker) 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-upgrade:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.4);
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      }
+
+      .btn-upgrade:active {
+        transform: translateY(0);
+      }
+
+      .premium-features {
+        background: var(--bg-panel);
+        border-radius: 10px;
+        padding: 25px;
+        margin-top: 30px;
+        border: 1px solid var(--border-color);
+      }
+
+      .premium-features h3 {
+        color: var(--text-primary);
+        margin-bottom: 20px;
+        text-align: center;
+        font-size: 20px;
+        font-weight: 600;
+      }
+
+      .features-list {
+        list-style: none;
+      }
+
+      .features-list li {
+        padding: 12px 0;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        font-size: 15px;
+      }
+
+      .features-list li::before {
+        content: "✅";
+        margin-left: 12px;
+        font-size: 20px;
+      }
+
+      .back-link {
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      .back-link a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+
+      .back-link a:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+      }
+
+      .messages {
+        margin-bottom: 20px;
+      }
+
+      .message {
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        border: 1px solid;
+      }
+
+      .message.success {
+        background: rgba(16, 185, 129, 0.1);
+        color: #6ee7b7;
+        border-color: rgba(16, 185, 129, 0.3);
+      }
+
+      .message.error {
+        background: rgba(239, 68, 68, 0.1);
+        color: #fca5a5;
+        border-color: rgba(239, 68, 68, 0.3);
+      }
+
+      .message.info {
+        background: rgba(59, 130, 246, 0.1);
+        color: #93c5fd;
+        border-color: rgba(59, 130, 246, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <span class="crown">👑</span>
+        <h1>ارتقا به نسخه پرمیوم</h1>
+        <p>از تمام امکانات بدون محدودیت استفاده کنید</p>
+      </div>
+
+      <div class="content">
+        {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+          <div class="message {{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="current-plan">
+          <h3>📊 محدودیت‌های فعلی شما:</h3>
+          <ul class="limitations">
+            <li>
+              حداکثر تعداد ردیف‌های لاگ:
+              <strong>
+                {% if user_limitations.max_log_rows == 0 %} نامحدود {% else %}
+                {{ user_limitations.max_log_rows }} ردیف {% endif %}
+              </strong>
+            </li>
+            <li>
+              حداکثر تعداد پروژه‌ها:
+              <strong>
+                {% if user_limitations.max_projects == 0 %} نامحدود {% else %}
+                {{ user_limitations.max_projects }} پروژه {% endif %}
+              </strong>
+            </li>
+            <li>
+              الگوریتم‌های مجاز:
+              <strong>
+                {% if user_limitations.allowed_algorithms|length == 3 %} همه
+                الگوریتم‌ها {% else %} فقط {{
+                user_limitations.allowed_algorithms|join:", " }} {% endif %}
+              </strong>
+            </li>
+          </ul>
+        </div>
+
+        <form method="post">
+          {% csrf_token %} {% if form.non_field_errors %}
+          <div class="error">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="form-group">
+            <label for="{{ form.license_code.id_for_label }}">
+              {{ form.license_code.label }}
+            </label>
+            {{ form.license_code }} {% if form.license_code.help_text %}
+            <div class="help-text">{{ form.license_code.help_text }}</div>
+            {% endif %} {% if form.license_code.errors %}
+            <div class="error">{{ form.license_code.errors }}</div>
+            {% endif %}
+          </div>
+
+          <button type="submit" class="btn-upgrade">
+            🚀 فعال‌سازی لایسنس پرمیوم
+          </button>
+        </form>
+
+        <div class="premium-features">
+          <h3>✨ امکانات نسخه پرمیوم</h3>
+          <ul class="features-list">
+            <li>بارگذاری لاگ‌های نامحدود</li>
+            <li>ایجاد پروژه‌های نامحدود</li>
+            <li>دسترسی به تمام الگوریتم‌های Process Mining</li>
+            <li>صادرات نتایج به فرمت‌های مختلف</li>
+            <li>پشتیبانی اختصاصی</li>
+            <li>آپدیت‌های رایگان</li>
+          </ul>
+        </div>
+
+        <div class="back-link">
+          <a href="{% url 'dashboard' %}">← بازگشت به داشبورد</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

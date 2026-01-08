@@ -1,0 +1,285 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block content %}
+<!-- Section 1: Manage Licenses -->
+<div style="margin-bottom: 2.5rem;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 0.5rem; overflow: hidden;">
+        <!-- Section Header -->
+        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 1rem 1.5rem; border-bottom: 2px solid var(--primary);">
+            <h2 style="color: var(--primary); font-size: 20px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.75rem; letter-spacing: 0.5px;">
+                <span style="font-size: 24px;">📋</span>
+                Manage Licenses
+            </h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin: 0.5rem 0 0 2.25rem;">
+                View, search, and manage existing license codes
+            </p>
+        </div>
+        
+        <!-- Content from parent template (search, filters, table) -->
+        <div style="padding: 0;">
+            {{ block.super }}
+        </div>
+    </div>
+</div>
+
+<!-- Section 2: Add New License -->
+<div style="margin-bottom: 2rem;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 0.5rem; overflow: hidden;">
+        <!-- Section Header -->
+        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 1rem 1.5rem; border-bottom: 2px solid var(--primary);">
+            <h2 style="color: var(--primary); font-size: 20px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.75rem; letter-spacing: 0.5px;">
+                <span style="font-size: 24px;">➕</span>
+                Add New License
+            </h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin: 0.5rem 0 0 2.25rem;">
+                Create a new license code for premium features
+            </p>
+        </div>
+        
+        <!-- Form Container -->
+        <div style="padding: 2rem;">
+            <form method="post" action="{% url 'admin:accounts_licensecode_add' %}">
+                {% csrf_token %}
+                
+                <!-- Grid Layout for Code and Duration -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <!-- Code Field -->
+                    <div>
+                        <label for="id_code" style="display: block; color: var(--text-secondary); font-weight: 600; font-size: 14px; margin-bottom: 0.625rem;">
+                            License Code <span style="color: #ef4444; font-weight: 700;">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            name="code" 
+                            id="id_code" 
+                            required
+                            style="width: 100%; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 0.5rem; padding: 0.75rem 1rem; font-size: 14px; font-family: 'Monaco', 'Courier New', monospace; letter-spacing: 1px; transition: all 0.2s ease;"
+                            placeholder="PREM-XXXX-XXXX-XXXX"
+                        />
+                        <small style="display: block; color: var(--text-muted); font-size: 12px; margin-top: 0.5rem; line-height: 1.4;">
+                            💡 Unique activation code for premium license
+                        </small>
+                    </div>
+                    
+                    <!-- Duration Field -->
+                    <div>
+                        <label for="id_duration_days" style="display: block; color: var(--text-secondary); font-weight: 600; font-size: 14px; margin-bottom: 0.625rem;">
+                            Duration (days)
+                        </label>
+                        <input 
+                            type="number" 
+                            name="duration_days" 
+                            id="id_duration_days"
+                            min="1"
+                            style="width: 100%; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 0.5rem; padding: 0.75rem 1rem; font-size: 14px; transition: all 0.2s ease;"
+                            placeholder="30"
+                        />
+                        <small style="display: block; color: var(--text-muted); font-size: 12px; margin-top: 0.5rem; line-height: 1.4;">
+                            ⏰ Leave empty for lifetime (∞) license
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- Notes Field (Full Width) -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="id_notes" style="display: block; color: var(--text-secondary); font-weight: 600; font-size: 14px; margin-bottom: 0.625rem;">
+                        Notes
+                    </label>
+                    <textarea 
+                        name="notes" 
+                        id="id_notes"
+                        rows="4"
+                        style="width: 100%; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 0.5rem; padding: 0.75rem 1rem; font-size: 14px; resize: vertical; font-family: var(--font-en); line-height: 1.6; transition: all 0.2s ease;"
+                        placeholder="Add internal notes or description for this license code..."
+                    ></textarea>
+                    <small style="display: block; color: var(--text-muted); font-size: 12px; margin-top: 0.5rem; line-height: 1.4;">
+                        📝 Internal notes (not visible to end users)
+                    </small>
+                </div>
+                
+                <!-- Active Checkbox -->
+                <div style="margin-bottom: 2rem; padding: 1rem; background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 0.5rem;">
+                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: var(--text-primary); font-size: 14px;">
+                        <input 
+                            type="checkbox" 
+                            name="is_active" 
+                            id="id_is_active"
+                            checked
+                            style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--primary);"
+                        />
+                        <div>
+                            <span style="font-weight: 600; display: block; margin-bottom: 0.25rem;">Active Status</span>
+                            <span style="color: var(--text-muted); font-size: 13px;">✅ Check to make this code immediately available for use</span>
+                        </div>
+                    </label>
+                </div>
+                
+                <!-- Submit Buttons -->
+                <div style="display: flex; flex-wrap: wrap; gap: 0.875rem; padding-top: 1.25rem; border-top: 2px solid var(--border-color);">
+                    <button 
+                        type="submit" 
+                        name="_save"
+                        style="background: var(--primary); color: #001b0f; border: none; border-radius: 0.5rem; padding: 0.75rem 2rem; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.625rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);"
+                        onmouseover="this.style.background='var(--primary-dark)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)'"
+                        onmouseout="this.style.background='var(--primary)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(16, 185, 129, 0.3)'"
+                    >
+                        <span style="font-size: 18px;">💾</span>
+                        <span>Save</span>
+                    </button>
+                    
+                    <button 
+                        type="submit" 
+                        name="_addanother"
+                        style="background: transparent; color: var(--primary); border: 2px solid var(--primary); border-radius: 0.5rem; padding: 0.75rem 1.75rem; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.625rem;"
+                        onmouseover="this.style.background='rgba(16, 185, 129, 0.1)'; this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.background='transparent'; this.style.transform='translateY(0)'"
+                    >
+                        <span style="font-size: 18px;">➕</span>
+                        <span>Save and add another</span>
+                    </button>
+                    
+                    <button 
+                        type="submit" 
+                        name="_continue"
+                        style="background: transparent; color: var(--text-secondary); border: 2px solid var(--border-color); border-radius: 0.5rem; padding: 0.75rem 1.75rem; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.625rem;"
+                        onmouseover="this.style.borderColor='var(--text-secondary)'; this.style.background='rgba(203, 213, 225, 0.05)'; this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.borderColor='var(--border-color)'; this.style.background='transparent'; this.style.transform='translateY(0)'"
+                    >
+                        <span style="font-size: 18px;">✏️</span>
+                        <span>Save and continue editing</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ==================== LICENSE CODE PAGE LAYOUT ==================== */
+
+/* Ensure vertical stack layout */
+.model-licensecode.change-list #content-main {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+}
+
+/* Remove side-by-side layout issues */
+.model-licensecode.change-list #content-main > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+}
+
+/* Section spacing */
+.model-licensecode.change-list #changelist {
+    margin-bottom: 0 !important;
+}
+
+/* Form input focus states with enhanced styling */
+#id_code:focus,
+#id_duration_days:focus,
+#id_notes:focus {
+    outline: none !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15) !important;
+    transform: translateY(-1px);
+}
+
+/* Code field monospace with better readability */
+#id_code {
+    letter-spacing: 1.5px;
+    font-weight: 500;
+}
+
+#id_code::placeholder {
+    letter-spacing: 0.5px;
+}
+
+/* Duration field styling */
+#id_duration_days {
+    font-weight: 500;
+}
+
+/* Notes field enhanced */
+#id_notes {
+    line-height: 1.7;
+}
+
+#id_notes:focus {
+    min-height: 120px;
+}
+
+/* Button hover effects with smooth transitions */
+button[type="submit"]:active {
+    transform: scale(0.97) !important;
+}
+
+/* Responsive grid - better breakpoints */
+@media (max-width: 1024px) {
+    form > div:first-of-type {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Stack buttons vertically on mobile */
+    form > div:last-of-type {
+        flex-direction: column !important;
+    }
+    
+    form > div:last-of-type button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+}
+
+/* Section headers gradient enhancement */
+.model-licensecode.change-list h2 {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Smooth scroll behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Enhanced checkbox styling */
+#id_is_active:checked {
+    filter: brightness(1.2);
+}
+
+/* Label hover effects */
+label[for="id_code"]:hover,
+label[for="id_duration_days"]:hover,
+label[for="id_notes"]:hover {
+    color: var(--primary);
+    transition: color 0.2s ease;
+}
+
+/* Input placeholder animations */
+input::placeholder,
+textarea::placeholder {
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+input:focus::placeholder,
+textarea:focus::placeholder {
+    opacity: 0.3;
+}
+
+/* Success highlight animation */
+@keyframes successPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+}
+
+/* Small emoji size adjustment */
+small span[style*="font-size"] {
+    vertical-align: middle;
+}
+</style>
+
+{% endblock %}

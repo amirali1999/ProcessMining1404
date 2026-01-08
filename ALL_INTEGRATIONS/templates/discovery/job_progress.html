@@ -1,0 +1,242 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Processing Event Log...</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: radial-gradient(#1e293b 0%, #0b1220 70%, #070b14 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #e5e7eb;
+      }
+
+      .progress-container {
+        background: rgba(17, 24, 39, 0.8);
+        border: 1px solid #1f2937;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        padding: 48px;
+        max-width: 600px;
+        width: 90%;
+        text-align: center;
+        backdrop-filter: blur(12px);
+      }
+
+      .spinner {
+        width: 80px;
+        height: 80px;
+        border: 8px solid #1f2937;
+        border-top: 8px solid #10b981;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 32px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      h1 {
+        font-size: 28px;
+        font-weight: 600;
+        color: #e5e7eb;
+        margin-bottom: 12px;
+      }
+
+      .filename {
+        font-size: 16px;
+        color: #94a3b8;
+        margin-bottom: 32px;
+        font-style: italic;
+      }
+
+      .progress-bar-container {
+        width: 100%;
+        height: 16px;
+        background: #0f172a;
+        border: 1px solid #1f2937;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 16px;
+      }
+
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+        width: 0%;
+        transition: width 0.5s ease;
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+      }
+
+      .progress-text {
+        font-size: 14px;
+        color: #94a3b8;
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+
+      .status-message {
+        font-size: 16px;
+        color: #10b981;
+        font-weight: 500;
+        min-height: 24px;
+      }
+
+      .error-container {
+        background: rgba(239, 68, 68, 0.1);
+        border: 2px solid #dc2626;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 24px;
+        text-align: left;
+      }
+
+      .error-title {
+        color: #fca5a5;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      .error-message {
+        color: #e5e7eb;
+        font-size: 14px;
+        white-space: pre-wrap;
+        font-family: "Courier New", monospace;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 12px;
+        border-radius: 6px;
+      }
+
+      .success-icon {
+        font-size: 64px;
+        color: #10b981;
+        margin-bottom: 16px;
+        animation: scaleIn 0.5s ease;
+      }
+
+      @keyframes scaleIn {
+        0% {
+          transform: scale(0);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .progress-container {
+          padding: 32px 24px;
+        }
+
+        h1 {
+          font-size: 24px;
+        }
+
+        .spinner {
+          width: 60px;
+          height: 60px;
+          border-width: 6px;
+        }
+
+        .success-icon {
+          font-size: 48px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="progress-container">
+      <div class="spinner" id="spinner"></div>
+      <h1 id="title">Processing Event Log</h1>
+      <div class="filename">{{ job.original_filename }}</div>
+
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <div class="progress-text" id="progressText">0%</div>
+      <div class="status-message" id="statusMessage">Initializing...</div>
+
+      <div class="error-container" id="errorContainer" style="display: none">
+        <div class="error-title">❌ Processing Failed</div>
+        <div class="error-message" id="errorMessage"></div>
+      </div>
+    </div>
+
+    <script>
+      const jobId = {{ job_id }};
+      const statusUrl = `/jobs/status/${jobId}/`;
+      let pollInterval;
+
+      function updateProgress() {
+          fetch(statusUrl)
+              .then(response => response.json())
+              .then(data => {
+                  // Update progress bar
+                  const progressBar = document.getElementById('progressBar');
+                  const progressText = document.getElementById('progressText');
+                  const statusMessage = document.getElementById('statusMessage');
+
+                  progressBar.style.width = data.progress + '%';
+                  progressText.textContent = data.progress + '%';
+                  statusMessage.textContent = data.message || 'Processing...';
+
+                  // Handle completion
+                  if (data.status === 'done') {
+                      clearInterval(pollInterval);
+                      document.getElementById('spinner').style.display = 'none';
+                      document.getElementById('title').innerHTML = '<div class="success-icon">✅</div>Complete!';
+                      statusMessage.textContent = 'Redirecting to dashboard...';
+
+                      // Redirect after 1 second
+                      setTimeout(() => {
+                          window.location.href = data.redirect_url || '/dashboard/';
+                      }, 1000);
+                  }
+
+                  // Handle error
+                  if (data.status === 'error') {
+                      clearInterval(pollInterval);
+                      document.getElementById('spinner').style.display = 'none';
+                      document.getElementById('title').textContent = 'Processing Failed';
+
+                      const errorContainer = document.getElementById('errorContainer');
+                      const errorMessage = document.getElementById('errorMessage');
+                      errorContainer.style.display = 'block';
+                      errorMessage.textContent = data.error_message || 'An unknown error occurred';
+                  }
+              })
+              .catch(error => {
+                  console.error('Error polling job status:', error);
+              });
+      }
+
+      // Start polling every 1 second
+      updateProgress(); // Initial call
+      pollInterval = setInterval(updateProgress, 1000);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>🔍 Debug Projects Page</title>
+    <style>
+      body {
+        font-family: "Courier New", monospace;
+        background: #1e1e1e;
+        color: #d4d4d4;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      .section {
+        background: #252526;
+        border: 1px solid #3e3e42;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      h2 {
+        color: #4ec9b0;
+        border-bottom: 2px solid #4ec9b0;
+        padding-bottom: 10px;
+      }
+      .command {
+        background: #1e1e1e;
+        border-left: 4px solid #007acc;
+        padding: 15px;
+        margin: 10px 0;
+        font-family: "Monaco", "Courier New", monospace;
+        overflow-x: auto;
+      }
+      .tip {
+        background: #1e3a1e;
+        border-left: 4px solid #4ec9b0;
+        padding: 15px;
+        margin: 10px 0;
+      }
+      .warning {
+        background: #3a2e1e;
+        border-left: 4px solid #ce9178;
+        padding: 15px;
+        margin: 10px 0;
+      }
+      code {
+        background: #1e1e1e;
+        padding: 2px 6px;
+        border-radius: 3px;
+        color: #ce9178;
+      }
+      .button {
+        background: #0e639c;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        margin: 5px;
+      }
+      .button:hover {
+        background: #1177bb;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔍 Projects Page Debug Guide</h1>
+
+    <div class="section">
+      <h2>📋 وضعیت فعلی</h2>
+      <p>صفحه Projects نقشه‌ها را نمایش نمی‌دهد.</p>
+      <div class="warning">
+        <strong>⚠️ احتمال اصلی:</strong> Jobs هنوز process نشده‌اند یا نقشه
+        تولید نکرده‌اند.
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>1️⃣ بررسی سریع - در Console مرورگر</h2>
+      <p>
+        کلید <code>F12</code> یا <code>Cmd+Option+I</code> را بزنید و این کد را
+        در Console اجرا کنید:
+      </p>
+
+      <div class="command">
+        // بررسی dataset items<br />
+        document.querySelectorAll('.dataset-item').forEach((item, index) => {<br />
+        &nbsp;&nbsp;console.log(`📁 Project ${index + 1}:`,
+        item.dataset.name);<br />
+        &nbsp;&nbsp;console.log(` Map URL:`, item.dataset.mapUrl || 'NOT
+        SET');<br />
+        &nbsp;&nbsp;console.log(` ---`);<br />
+        });
+      </div>
+
+      <div class="tip">
+        <strong>✅ اگر Map URL نشان داد:</strong> مشکل در JavaScript است<br />
+        <strong>❌ اگر Map URL خالی است:</strong> Jobs هنوز نقشه ندارند
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>2️⃣ بررسی Terminal Django</h2>
+      <p>
+        وقتی صفحه /projects/ را باز می‌کنید، در Terminal Django باید این پیام‌ها
+        را ببینید:
+      </p>
+
+      <div class="command">
+        🔍 Project: [نام پروژه]<br />
+        &nbsp;&nbsp;&nbsp;Job ID: [شماره]<br />
+        &nbsp;&nbsp;&nbsp;Status: done<br />
+        &nbsp;&nbsp;&nbsp;Has SVG: True/False<br />
+        &nbsp;&nbsp;&nbsp;Has PNG: True/False<br />
+        &nbsp;&nbsp;&nbsp;Map URL: [URL یا None]
+      </div>
+
+      <div class="warning">
+        <strong>⚠️ اگر پیامی نمی‌بینید:</strong> View اجرا نشده - Hard Refresh
+        کنید
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>3️⃣ تست کامل - دستور Shell</h2>
+      <p>این دستور را در Terminal اجرا کنید:</p>
+
+      <div class="command">
+        cd /Users/macos/Documents/PM/pm<br />
+        ./check_projects_status.sh
+      </div>
+
+      <p>خروجی را بررسی کنید:</p>
+      <ul>
+        <li>✅ اگر "Jobs با نقشه" بیشتر از 0 است → نقشه وجود دارد</li>
+        <li>❌ اگر 0 است → باید فایل جدید آپلود کنید</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>4️⃣ راه‌حل: ایجاد نقشه جدید</h2>
+      <p>اگر هیچ نقشه‌ای وجود ندارد:</p>
+
+      <ol>
+        <li>
+          به Dashboard بروید: <code>http://127.0.0.1:8000/dashboard/</code>
+        </li>
+        <li>روی دکمه <strong>📁 Open</strong> کلیک کنید</li>
+        <li>یک فایل CSV آپلود کنید (مثلاً یک فایل تست)</li>
+        <li>Project Name را وارد کنید (مثلاً "Test Project")</li>
+        <li>Mining Method را انتخاب کنید (Alpha)</li>
+        <li>منتظر بمانید تا Processing تکمیل شود</li>
+        <li>سپس به <code>/projects/</code> بروید</li>
+      </ol>
+
+      <div class="tip">
+        <strong>💡 نکته:</strong> Processing ممکن است چند دقیقه طول بکشد بسته به
+        اندازه فایل
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>5️⃣ اگر نقشه وجود دارد اما نمایش نمی‌دهد</h2>
+
+      <h3>گام 1: Hard Refresh</h3>
+      <p>
+        <strong>Mac:</strong> <code>Cmd + Shift + R</code><br />
+        <strong>Windows:</strong> <code>Ctrl + Shift + R</code>
+      </p>
+
+      <h3>گام 2: بررسی Network Tab</h3>
+      <ol>
+        <li>Console را باز کنید (F12)</li>
+        <li>به تب <strong>Network</strong> بروید</li>
+        <li>صفحه را Refresh کنید</li>
+        <li>دنبال فایل‌های <code>.svg</code> یا <code>.png</code> بگردید</li>
+        <li>اگر 404 دیدید → فایل در مسیر درست نیست</li>
+      </ol>
+
+      <h3>گام 3: تست مستقیم URL</h3>
+      <p>در Console مرورگر:</p>
+      <div class="command">
+        // گرفتن URL اولین پروژه<br />
+        const firstItem = document.querySelector('.dataset-item');<br />
+        const mapUrl = firstItem.dataset.mapUrl;<br />
+        console.log('Map URL:', mapUrl);<br />
+        <br />
+        // تست بارگذاری<br />
+        const img = new Image();<br />
+        img.onload = () => console.log('✅ Image loaded');<br />
+        img.onerror = () => console.error('❌ Image failed');<br />
+        img.src = mapUrl;
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>6️⃣ Actions</h2>
+      <button
+        class="button"
+        onclick="window.location.href='http://127.0.0.1:8000/dashboard/'"
+      >
+        🏠 Go to Dashboard
+      </button>
+      <button
+        class="button"
+        onclick="window.location.href='http://127.0.0.1:8000/projects/'"
+      >
+        📦 Go to Projects
+      </button>
+      <button
+        class="button"
+        onclick="window.location.href='http://127.0.0.1:8000/admin/'"
+      >
+        ⚙️ Go to Admin
+      </button>
+    </div>
+
+    <div class="section">
+      <h2>📞 نیاز به کمک بیشتر؟</h2>
+      <p>اطلاعات زیر را ارسال کنید:</p>
+      <ul>
+        <li>✅ خروجی <code>check_projects_status.sh</code></li>
+        <li>✅ Screenshot از Console مرورگر</li>
+        <li>✅ پیام‌های Terminal Django</li>
+      </ul>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,599 @@
+:root {
+  --font-fa: "Vazirmatn", "Segoe UI", Tahoma, Arial, sans-serif;
+  --font-en: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+    sans-serif;
+  --bg: #0f172a; /* slate-900 */
+  --panel: #111827; /* gray-900 */
+  --muted: #94a3b8; /* slate-400 */
+  --text: #e5e7eb; /* gray-200 */
+  --primary: #10b981; /* emerald-500 */
+  --primary-600: #059669; /* emerald-600 */
+  --danger: #ef4444; /* red-500 */
+  --border: #1f2937; /* gray-800 */
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+}
+/* body{
+  margin:0;
+  font-family: var(--font-fa);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color:var(--text);
+  background: radial-gradient(#1e293b 0%, #0b1220 70%, #070b14 100%);
+} */
+body {
+  display: flex; /* keep body as flex column */
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  font-family: var(--font-fa);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--text);
+  background: radial-gradient(#1e293b 0%, #0b1220 70%, #070b14 100%);
+}
+
+.latin,
+:lang(en) {
+  font-family: var(--font-en);
+  letter-spacing: 0.2px;
+}
+
+/* Ensure controls inherit the correct font */
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-fa);
+}
+.latin,
+:lang(en) {
+  font-family: var(--font-en);
+  letter-spacing: 0.2px;
+}
+
+/* Language Switcher - Removed fixed positioning, now in navbar */
+
+.lang-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 38px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1.5px solid var(--primary);
+  border-radius: 0.5rem;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all 0.2s;
+  font-family: var(--font-en);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.lang-btn:hover {
+  background: var(--primary);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Main content container with vertical padding */
+main.container {
+  padding: 1.5rem 1.5rem 3rem 1.5rem;
+  flex: 1 0 auto;
+}
+
+/* Header Styles - Consistent across all pages */
+.site-header {
+  position: sticky;
+  top: 0;
+  background: rgba(17, 24, 39, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Navbar - Fixed height and consistent spacing */
+.navbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  min-height: 64px;
+  gap: 1rem;
+}
+
+/* Right side container for nav-links and language switcher */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto;
+}
+
+/* RTL Support: In Persian, move to left side */
+html[dir="rtl"] .navbar-right {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* Language Switcher in navbar */
+.language-switcher {
+  display: flex;
+  align-items: center;
+}
+
+.navbar a {
+  color: var(--text);
+  text-decoration: none;
+  margin-inline-start: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.navbar a:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--primary);
+}
+
+.brand {
+  flex-shrink: 0;
+}
+
+.brand a {
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 0.5rem 0;
+}
+
+.brand a:hover {
+  background: transparent;
+  color: var(--primary);
+}
+
+/* Nav links container */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+/* RTL/LTR Support for Navbar */
+html[dir="rtl"] .navbar {
+  direction: rtl;
+}
+html[dir="ltr"] .navbar {
+  direction: ltr;
+}
+html[dir="rtl"] .nav-links {
+  flex-direction: row-reverse;
+}
+html[dir="ltr"] .nav-links {
+  flex-direction: row;
+}
+.btn {
+  display: inline-block;
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: #001b0f;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  transition: all 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.btn:hover {
+  background: var(--primary-600);
+  border-color: var(--primary-600);
+  transform: translateY(-1px);
+}
+.btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+}
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #001b0f;
+}
+.btn-primary:hover {
+  background: var(--primary-600);
+  border-color: var(--primary-600);
+}
+.btn-sm {
+  display: inline-block;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.btn-block {
+  display: block;
+  width: 100%;
+}
+.btn-text {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0.25rem;
+}
+.btn-text:hover {
+  color: var(--text);
+}
+
+.messages {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+.message {
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: rgba(17, 24, 39, 0.6);
+}
+.message.success {
+  border-color: #065f46;
+  background: rgba(16, 185, 129, 0.08);
+}
+.message.error {
+  border-color: #7f1d1d;
+  background: rgba(239, 68, 68, 0.08);
+}
+.message.warning {
+  border-color: #78350f;
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.auth {
+  display: grid;
+  place-items: center;
+  min-height: calc(100vh - 120px);
+}
+.card {
+  width: min(100%, 520px);
+  background: rgba(17, 24, 39, 0.8);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.35);
+}
+.auth-card {
+  padding: 1.25rem;
+}
+.card-title {
+  margin: 0 0 1rem 0;
+}
+
+.form {
+  display: grid;
+  gap: 1rem;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--muted);
+}
+.form-group input {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--border);
+  background: #0b1324;
+  color: var(--text);
+}
+.form-group select {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--border);
+  background: #0b1324;
+  color: var(--text);
+}
+.form-group input:focus {
+  outline: none;
+  border-color: #334155;
+  box-shadow: 0 0 0 3px rgba(51, 65, 85, 0.35);
+}
+.password-field {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.password-field input {
+  flex: 1;
+}
+.field-error {
+  display: block;
+  color: #ffb4b4;
+  margin-top: 0.35rem;
+}
+.alert {
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--border);
+  background: rgba(17, 24, 39, 0.6);
+}
+.alert.error {
+  border-color: #7f1d1d;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.95rem;
+  text-align: center;
+}
+/* .site-footer{display: block;position: static;bottom: 0;width: 100%;margin-top: auto;background:rgb(12 17 28 / 83%);padding:1rem 1rem;text-align: center;border-top:1px solid var(--border);color:var(--muted);} */
+/* footer: use auto margin to stick to bottom when content is short */
+.site-footer {
+  margin-top: auto; /* pushes footer down */
+  position: relative; /* avoid overlap with other elements */
+  width: 100%;
+  background: rgb(12 17 28 / 83%);
+  padding: 1rem 1rem;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+}
+.dashboard-grid {
+  padding: 1.5rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-evenly; /* distribute cards with space between */
+  margin: 1rem 0;
+}
+.dashboard-grid > .card {
+  flex: 1 1 calc(33.333% - 1rem); /* three columns */
+  min-width: 220px;
+  max-width: 360px;
+  width: auto; /* override .card's min(...) */
+}
+/* center a single card in the grid */
+.dashboard-grid > .card:only-child {
+  margin-left: auto;
+  margin-right: auto;
+}
+/* responsive breakpoints */
+@media (max-width: 900px) {
+  .dashboard-grid > .card {
+    flex: 1 1 calc(50% - 1rem);
+  } /* two columns */
+}
+@media (max-width: 520px) {
+  .dashboard-grid > .card {
+    flex: 1 1 100%;
+  } /* single column on small screens */
+}
+
+/* Ensure card titles are bright and stay bright when the link is visited/active/focused */
+a.card,
+a.card:link,
+a.card:visited,
+a.card:active,
+a.card:focus {
+  color: inherit; /* keep text color consistent inside the card */
+  text-decoration: none;
+}
+.hov {
+  color: #ffffff; /* bright title by default */
+  transition: color 0.18s ease;
+}
+/* if server marks the current card with .active, keep it bright as well */
+.card.active h3,
+a.card.active h3 {
+  color: #ffffff;
+}
+
+/* Hover / focus: change only the card title color */
+.hov:hover {
+  color: var(--primary-600);
+}
+
+/* ============================================
+   MOBILE RESPONSIVE STYLES
+   ============================================ */
+
+/* Tablet and below */
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 1rem;
+  }
+
+  main.container {
+    padding: 1.25rem 1rem 2.5rem 1rem;
+  }
+
+  .navbar {
+    padding: 0.875rem 0;
+    min-height: 60px;
+  }
+
+  .brand a {
+    font-size: 1rem;
+  }
+
+  .navbar a {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* Mobile devices */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 0.75rem;
+  }
+
+  main.container {
+    padding: 1rem 0.75rem 2rem 0.75rem;
+  }
+  /* Navbar stacks vertically on mobile */
+  .navbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    min-height: auto;
+  }
+  .brand {
+    text-align: center;
+    order: 1;
+  }
+  .brand a {
+    display: block;
+    padding: 0.5rem;
+    font-size: 1.05rem;
+  }
+
+  /* Right side on mobile - stacks below brand */
+  .navbar-right {
+    order: 2;
+    flex-direction: column;
+    width: 100%;
+    margin: 0;
+    gap: 0.5rem;
+  }
+
+  .nav-links {
+    flex-direction: column !important;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  /* Language switcher on mobile - show at bottom right */
+  .language-switcher {
+    justify-content: flex-end;
+  }
+
+  .navbar a {
+    display: block;
+    text-align: center;
+    padding: 0.625rem;
+    margin: 0;
+    width: 100%;
+    font-size: 0.95rem;
+  } /* Language switcher - now part of navbar, no special adjustments needed */
+
+  .lang-btn {
+    width: 45px;
+    height: 35px;
+    font-size: 0.85rem;
+  }
+
+  /* Buttons on mobile */
+  .btn {
+    padding: 0.55rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-sm {
+    padding: 0.5rem 0.85rem;
+    font-size: 0.875rem;
+  }
+
+  /* Dashboard cards stack on mobile */
+  .dashboard-grid {
+    padding: 1rem 0;
+  }
+
+  .dashboard-grid > .card {
+    flex: 1 1 100%;
+  }
+
+  /* Messages on mobile */
+  .message {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.9rem;
+  }
+
+  /* Auth forms on mobile */
+  .auth-card {
+    padding: 1rem;
+  }
+
+  .card-title {
+    font-size: 1.25rem;
+  }
+
+  /* Form inputs smaller on mobile */
+  .form-group input,
+  .form-group select {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+
+  main.container {
+    padding: 0.75rem 0.5rem 1.5rem 0.5rem;
+  }
+
+  .navbar {
+    padding: 0.5rem 0;
+  }
+
+  .brand a {
+    font-size: 0.95rem;
+  }
+
+  .navbar a {
+    font-size: 0.875rem;
+    padding: 0.5rem;
+  } /* Language switcher is part of navbar, handled by navbar responsive styles */
+
+  .lang-btn {
+    width: 42px;
+    height: 33px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Desktop - optimize for larger screens */
+@media (min-width: 1441px) {
+  .container {
+    max-width: 1400px;
+  }
+
+  .navbar {
+    padding: 1.125rem 0;
+  }
+
+  .brand a {
+    font-size: 1.25rem;
+  }
+}

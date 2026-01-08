@@ -1,0 +1,417 @@
+{% extends "base.html" %}
+{% load static %}
+{% load l10n %}
+
+{% block title %}Visualization - {{ event_log.name }}{% endblock %}
+
+{% block content %}
+<div class="pm-container">
+  <!-- Disco-like Step Bar -->
+  <div class="pm-step-bar">
+    <a href="{% url 'preprocessing_dashboard' %}" class="pm-step pm-step-link">
+      <div class="pm-step-number">1</div>
+      <div class="pm-step-label">Upload</div>
+    </a>
+    <a href="{% url 'smart_clean' event_log.id %}" class="pm-step pm-step-link">
+      <div class="pm-step-number">2</div>
+      <div class="pm-step-label">Smart Clean</div>
+    </a>
+    <a href="{% url 'discover_view' event_log.id %}" class="pm-step pm-step-link">
+      <div class="pm-step-number">3</div>
+      <div class="pm-step-label">Discovery</div>
+    </a>
+    <div class="pm-step pm-step-active">
+      <div class="pm-step-number">4</div>
+      <div class="pm-step-label">Visualization</div>
+    </div>
+    <a href="{% url 'conformance_view' event_log.id %}" class="pm-step pm-step-link">
+      <div class="pm-step-number">5</div>
+      <div class="pm-step-label">Conformance</div>
+    </a>
+    <a href="/prediction/" class="pm-step pm-step-link">
+      <div class="pm-step-number">6</div>
+      <div class="pm-step-label">Prediction</div>
+    </a>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="pm-main-content">
+    <!-- Log Info Card -->
+    <div class="pm-card pm-log-info-card">
+      <h2>{{ model }}</h2>
+      <div class="pm-stats-grid">
+        <div class="pm-stat">
+          <label>Algorithm:</label>
+          <span>{{ model.get_algorithm_display }}</span>
+        </div>
+        <div class="pm-stat">
+          <label>Event Log:</label>
+          <span>{{ event_log.name }}</span>
+        </div>
+        <div class="pm-stat">
+          <label>Source Version:</label>
+          <span>{{ model.get_source_version_display }}</span>
+        </div>
+        <div class="pm-stat">
+          <label>Discovered:</label>
+          <span>{{ model.discovered_at|date:"Y-m-d H:i" }}</span>
+        </div>
+        <div class="pm-stat">
+          <label>Places:</label>
+          <span>{{ model.num_places }}</span>
+        </div>
+        <div class="pm-stat">
+          <label>Transitions:</label>
+          <span>{{ model.num_transitions }}</span>
+        </div>
+        <div class="pm-stat">
+          <label>Arcs:</label>
+          <span>{{ model.num_arcs }}</span>
+        </div>
+        <div class="pm-stat">
+          <label>Discovered By:</label>
+          <span>{{ model.discovered_by.username|default:"System" }}</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; gap: 12px; margin-top: 20px;">
+        <button onclick="downloadSVG()" class="pm-btn pm-btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; display: inline-block; vertical-align: middle;">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download SVG
+        </button>
+        <a href="{% url 'discover_view' event_log.id %}" class="pm-btn pm-btn-outline">
+          Back to Discovery
+        </a>
+      </div>
+    </div>
+
+    <!-- Petri Net Visualization -->
+    <div class="pm-card">
+      <div class="pm-card-title">
+        <h3>Petri Net Diagram</h3>
+      </div>
+
+      <div class="pm-visualization-container">
+        <div id="loading-indicator" class="pm-loading">
+          <div class="pm-spinner"></div>
+          <p>Rendering Petri net...</p>
+        </div>
+
+        <div id="error-indicator" class="pm-error" style="display: none;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+          <p>Failed to load visualization</p>
+          <small>Check server logs for details</small>
+        </div>
+
+        <div id="petrinet-svg-container" style="display: none;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Step Bar Styles */
+.pm-step-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.pm-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+}
+
+.pm-step-link {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pm-step-link:hover .pm-step-number {
+  background: #0056b3;
+  color: white;
+  transform: scale(1.1);
+}
+
+.pm-step-link:hover .pm-step-label {
+  color: #0056b3;
+}
+
+.pm-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 60%;
+  width: 80%;
+  height: 2px;
+  background: #dee2e6;
+}
+
+.pm-step-active::after {
+  background: #007bff;
+}
+
+.pm-step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #dee2e6;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-bottom: 8px;
+  z-index: 1;
+}
+
+.pm-step-active .pm-step-number {
+  background: #007bff;
+  color: white;
+}
+
+.pm-step-disabled .pm-step-number {
+  background: #f8f9fa;
+  color: #adb5bd;
+}
+
+.pm-step-label {
+  font-size: 14px;
+  color: #495057;
+  font-weight: 500;
+}
+
+.pm-step-active .pm-step-label {
+  color: #007bff;
+  font-weight: 600;
+}
+
+.pm-step-disabled .pm-step-label {
+  color: #868e96;
+}
+
+.pm-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.pm-main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pm-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.pm-log-info-card {
+  padding: 24px;
+}
+
+.pm-log-info-card h2 {
+  margin: 0 0 20px 0;
+  color: #212529;
+  font-size: 24px;
+}
+
+.pm-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.pm-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.pm-stat label {
+  font-size: 12px;
+  color: #6c757d;
+  font-weight: 500;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pm-stat span {
+  font-size: 16px;
+  color: #212529;
+  font-weight: 600;
+}
+
+.pm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.pm-btn-primary {
+  background: #007bff;
+  color: white;
+}
+
+.pm-btn-primary:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+.pm-btn-outline {
+  background: white;
+  color: #007bff;
+  border: 2px solid #007bff;
+}
+
+.pm-btn-outline:hover {
+  background: #007bff;
+  color: white;
+}
+
+.pm-card-title {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.pm-card-title h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #212529;
+}
+
+.pm-visualization-container {
+  background: #f8f9fa;
+  padding: 40px;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.pm-loading,
+.pm-error {
+  text-align: center;
+  color: #666;
+}
+
+.pm-error {
+  color: #d32f2f;
+}
+
+.pm-error svg {
+  margin-bottom: 16px;
+}
+
+.pm-error p {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 8px 0;
+}
+
+.pm-error small {
+  font-size: 14px;
+  color: #999;
+}
+
+.pm-spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#petrinet-svg-container {
+  max-width: 100%;
+  overflow: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+#petrinet-svg-container svg {
+  max-width: 100%;
+  height: auto;
+}
+</style>
+
+<script>
+// Load SVG directly for better quality
+function loadVisualization() {
+  const modelId = {{ model.id }};
+  const svgUrl = `/api/discovered-models/${modelId}/petrinet-svg/`;
+  
+  fetch(svgUrl)
+    .then(response => {
+      if (!response.ok) throw new Error('Failed to fetch SVG');
+      return response.text();
+    })
+    .then(svgContent => {
+      document.getElementById('loading-indicator').style.display = 'none';
+      const container = document.getElementById('petrinet-svg-container');
+      container.innerHTML = svgContent;
+      container.style.display = 'block';
+    })
+    .catch(error => {
+      console.error('Error loading SVG:', error);
+      document.getElementById('loading-indicator').style.display = 'none';
+      document.getElementById('error-indicator').style.display = 'block';
+    });
+}
+
+function downloadSVG() {
+  const modelId = {{ model.id }};
+  const downloadUrl = `/api/discovered-models/${modelId}/petrinet-svg/?download=true`;
+  
+  // Create temporary anchor and trigger download
+  const a = document.createElement('a');
+  a.href = downloadUrl;
+  a.download = `petri_net_model_${modelId}.svg`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// Load visualization when page loads
+document.addEventListener('DOMContentLoaded', loadVisualization);
+</script>
+{% endblock %}

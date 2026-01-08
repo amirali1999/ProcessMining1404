@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Process Discovery{% endblock %}
+
+{% block content %}
+<div class="pm-container">
+  <!-- Header -->
+  <div class="pm-welcome-card">
+    <h1>🔍 Process Discovery</h1>
+    <p>
+      Discover process models from event logs using industry-standard algorithms.
+      Select an event log below to begin discovery.
+    </p>
+  </div>
+
+  <!-- Event Logs List -->
+  <div class="pm-card">
+    <h2>Available Event Logs</h2>
+    
+    {% if event_logs %}
+      <div class="pm-logs-list">
+        {% for log in event_logs %}
+          <div class="pm-log-item">
+            <div class="pm-log-item-header">
+              <h3>{{ log.name }}</h3>
+              <span class="pm-badge pm-badge-{{ log.file_type }}">{{ log.file_type|upper }}</span>
+              {% if log.has_cleaned_version %}
+                <span class="pm-badge pm-badge-success">Cleaned</span>
+              {% endif %}
+            </div>
+            
+            <div class="pm-log-item-stats">
+              <span>📊 {{ log.num_cases|default:"—" }} cases</span>
+              <span>• {{ log.num_events|default:"—" }} events</span>
+              <span>• {{ log.num_activities|default:"—" }} activities</span>
+            </div>
+            
+            <div class="pm-log-item-models">
+              {% with models=log.discovered_models.all %}
+                {% if models %}
+                  <span class="pm-model-count">🎯 {{ models.count }} model{{ models|length|pluralize }} discovered</span>
+                  <div class="pm-model-tags">
+                    {% for model in models %}
+                      <span class="pm-badge pm-badge-model">{{ model.get_algorithm_display }}</span>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <span class="pm-model-count-none">No models yet</span>
+                {% endif %}
+              {% endwith %}
+            </div>
+            
+            <div class="pm-log-item-actions">
+              <a href="{% url 'discover_view' log.id %}" class="pm-btn pm-btn-primary">
+                Discover Process
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="pm-empty-state">
+        <p>No event logs available. Please upload a log file first.</p>
+        <a href="{% url 'upload_file' %}" class="pm-btn pm-btn-primary">Upload Log</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+.pm-logs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pm-log-item {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background: white;
+  transition: box-shadow 0.2s;
+}
+
+.pm-log-item:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.pm-log-item-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.pm-log-item-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #212529;
+  font-weight: 600;
+}
+
+.pm-log-item-stats {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 13px;
+  color: #495057;
+  font-weight: 500;
+}
+
+.pm-log-item-models {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.pm-model-count {
+  font-size: 14px;
+  color: #212529;
+  font-weight: 500;
+}
+
+.pm-model-count-none {
+  font-size: 14px;
+  color: #868e96;
+  font-style: italic;
+}
+
+.pm-model-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pm-badge-model {
+  background-color: #e7f1ff;
+  color: #0c5ba0;
+}
+
+.pm-log-item-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.pm-welcome-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.pm-welcome-card h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+}
+
+.pm-welcome-card p {
+  margin: 0;
+  font-size: 15px;
+  opacity: 0.95;
+}
+
+.pm-empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #495057;
+}
+
+.pm-empty-state p {
+  margin-bottom: 1.5rem;
+  font-size: 15px;
+}
+</style>
+{% endblock %}

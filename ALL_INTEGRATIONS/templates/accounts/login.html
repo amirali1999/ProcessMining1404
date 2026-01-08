@@ -1,0 +1,60 @@
+{% extends "base.html" %} {% load translate %} {% block title %}{% trans 'login'
+%}{% endblock %} {% block content %}
+<section class="auth">
+  <div class="card auth-card">
+    <h2 class="card-title">{% trans 'login' %}</h2>
+    <form method="post" class="form">
+      {% csrf_token %} {% if form.non_field_errors %}
+      <div class="alert error">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="form-group">
+        <label for="id_username">{% trans 'username' %}</label>
+        {{ form.username }} {% if form.username.errors %}<small
+          class="field-error"
+          >{{ form.username.errors|striptags }}</small
+        >{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="id_password">{% trans 'password' %}</label>
+        <div class="password-field">
+          {{ form.password }}
+          <button
+            type="button"
+            class="btn-text toggle-password"
+            aria-label="Show/Hide"
+            data-target="id_password"
+          >
+            👁️
+          </button>
+        </div>
+        {% if form.password.errors %}<small class="field-error"
+          >{{ form.password.errors|striptags }}</small
+        >{% endif %}
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">
+        {% trans 'login' %}
+      </button>
+    </form>
+    <p class="muted">
+      {% trans 'no_account' %}
+      <a href="{% url 'register' %}">{% trans 'register' %}</a>
+    </p>
+    <p class="muted" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+      <a href="{% url 'admin_login' %}" style="color: #666;">ورود به پنل مدیریت</a>
+    </p>
+  </div>
+</section>
+
+<script>
+  document.addEventListener("click", function (e) {
+    const btn = e.target.closest(".toggle-password");
+    if (!btn) return;
+    const id = btn.getAttribute("data-target");
+    const input = document.getElementById(id);
+    if (!input) return;
+    input.type = input.type === "password" ? "text" : "password";
+  });
+</script>
+{% endblock %}

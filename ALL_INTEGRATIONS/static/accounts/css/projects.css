@@ -1,0 +1,491 @@
+/* Projects Page - Disco-like UI - Dark Theme */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  background: #0f172a;
+  color: #e5e7eb;
+  overflow: hidden;
+}
+
+/* Main Container */
+.projects-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* ============================================ */
+/* TOP HEADER */
+/* ============================================ */
+.projects-header {
+  height: 60px;
+  background: #111827;
+  border-bottom: 1px solid #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.header-icon {
+  font-size: 20px;
+}
+
+.header-text {
+  font-weight: 500;
+}
+
+.project-name {
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.header-right {
+  display: flex;
+  gap: 24px;
+}
+
+.header-tool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.header-tool:hover {
+  opacity: 0.8;
+}
+
+.header-tool .tool-icon {
+  font-size: 20px;
+  color: #10b981;
+}
+
+.header-tool .tool-label {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* ============================================ */
+/* MAIN CONTENT: 3 COLUMNS */
+/* ============================================ */
+.projects-main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* LEFT SIDEBAR: Datasets List */
+.datasets-sidebar {
+  width: 320px;
+  background: #1e293b;
+  border-right: 1px solid #1f2937;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebar-header {
+  padding: 16px 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #1f2937;
+  background: #111827;
+}
+
+.datasets-list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.dataset-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  gap: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #1f2937;
+  transition: background-color 0.15s;
+  background: #1e293b;
+}
+
+.dataset-item:hover {
+  background: #334155;
+}
+
+.dataset-item.active {
+  background: rgba(16, 185, 129, 0.15);
+  color: #e5e7eb;
+  border-bottom-color: #10b981;
+  border-left: 3px solid #10b981;
+}
+
+.dataset-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.dataset-item.active .dataset-icon {
+  filter: brightness(1.3);
+}
+
+.dataset-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dataset-title {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dataset-subtitle {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.dataset-item.active .dataset-subtitle {
+  color: #10b981;
+}
+
+.dataset-chevron {
+  font-size: 20px;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.dataset-item.active .dataset-chevron {
+  color: #10b981;
+}
+
+/* CENTER WORKSPACE: Map Preview */
+.workspace-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #0f172a;
+  min-width: 0;
+}
+
+.workspace-header {
+  padding: 20px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #94a3b8;
+  border-bottom: 1px solid #1f2937;
+  background: #111827;
+}
+
+.dataset-name {
+  color: #e5e7eb;
+  font-weight: 600;
+}
+
+.map-preview-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.map-preview {
+  width: 100%;
+  max-width: 800px;
+  aspect-ratio: 16 / 10;
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  overflow: auto;
+}
+
+.map-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.map-preview:hover {
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.map-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.map-tooltip {
+  padding: 12px 24px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+/* RIGHT DETAILS PANEL */
+.details-panel {
+  width: 380px;
+  background: #1e293b;
+  border-left: 1px solid #1f2937;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.details-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #1f2937;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.detail-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.details-actions {
+  padding: 20px;
+  border-top: 1px solid #1f2937;
+  display: flex;
+  gap: 12px;
+  background: #111827;
+}
+
+.action-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  border: 1px solid #1f2937;
+  border-radius: 8px;
+  background: #1e293b;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.action-btn:hover {
+  background: #334155;
+  border-color: #10b981;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+}
+
+.action-btn:active {
+  transform: translateY(1px);
+}
+
+.details-btn {
+  background: #10b981;
+  border-color: #059669;
+  color: #fff;
+}
+
+.details-btn:hover {
+  background: #059669;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+}
+
+.btn-icon {
+  font-size: 24px;
+}
+
+.btn-label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.details-btn .btn-label {
+  color: #fff;
+}
+
+/* ============================================ */
+/* NOTES SECTION */
+/* ============================================ */
+.notes-section {
+  display: flex;
+  gap: 12px;
+  padding: 20px 24px;
+  background: #111827;
+  border-top: 1px solid #1f2937;
+  border-bottom: 1px solid #1f2937;
+  flex-shrink: 0;
+}
+
+.notes-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.notes-content {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #e5e7eb;
+}
+
+/* ============================================ */
+/* BOTTOM TOOLBAR */
+/* ============================================ */
+.projects-toolbar {
+  height: 80px;
+  background: #111827;
+  border-top: 1px solid #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.toolbar-left,
+.toolbar-right {
+  display: flex;
+  gap: 32px;
+}
+
+.toolbar-tool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.toolbar-tool:hover {
+  opacity: 0.8;
+}
+
+.toolbar-tool .tool-icon {
+  font-size: 24px;
+  color: #10b981;
+}
+
+.toolbar-tool .tool-label {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* ============================================ */
+/* SCROLLBAR STYLING */
+/* ============================================ */
+.datasets-list::-webkit-scrollbar,
+.details-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.datasets-list::-webkit-scrollbar-track,
+.details-content::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+.datasets-list::-webkit-scrollbar-thumb,
+.details-content::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+.datasets-list::-webkit-scrollbar-thumb:hover,
+.details-content::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* ============================================ */
+/* RESPONSIVE (Optional) */
+/* ============================================ */
+@media (max-width: 1200px) {
+  .datasets-sidebar {
+    width: 280px;
+  }
+
+  .details-panel {
+    width: 320px;
+  }
+}
+
+@media (max-width: 900px) {
+  .projects-main {
+    flex-direction: column;
+  }
+
+  .datasets-sidebar,
+  .details-panel {
+    width: 100%;
+    max-height: 200px;
+  }
+
+  .workspace-center {
+    min-height: 300px;
+  }
+}

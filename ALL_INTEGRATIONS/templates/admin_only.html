@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% load translate %}
+{% block title %}{% trans 'admin_only' %}{% endblock %}
+{% block content %}
+  <h2>{% trans 'admin_only' %}</h2>
+  <p>{% trans 'admin_only_message' %}</p>
+{% endblock %}

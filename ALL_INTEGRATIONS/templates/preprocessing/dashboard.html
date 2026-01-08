@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Process Mining Dashboard{% endblock %}
+
+{% block content %}
+<div class="pm-dashboard">
+  <div class="pm-sidebar">
+    <div class="pm-sidebar-header">
+      <h3>Event Logs</h3>
+      <a href="{% url 'uploads_list' %}" class="pm-btn pm-btn-sm pm-btn-primary">+ Upload New</a>
+    </div>
+    
+    <div class="pm-log-list">
+      {% if event_logs %}
+        {% for log in event_logs %}
+        <a href="{% url 'smart_clean' log.id %}" 
+           class="pm-log-item {% if selected_log and selected_log.id == log.id %}pm-log-item-active{% endif %}">
+          <div class="pm-log-item-name">{{ log.name }}</div>
+          <div class="pm-log-item-meta">
+            <span class="pm-log-badge pm-log-badge-{{ log.file_type }}">{{ log.file_type|upper }}</span>
+            {% if log.has_cleaned_version %}
+            <span class="pm-log-badge pm-log-badge-cleaned">✓ Cleaned</span>
+            {% endif %}
+          </div>
+          <div class="pm-log-item-stats">
+            {% if log.num_cases %}
+            {{ log.num_cases }} cases · {{ log.num_events }} events
+            {% else %}
+            Not analyzed yet
+            {% endif %}
+          </div>
+        </a>
+        {% endfor %}
+      {% else %}
+        <div class="pm-empty-state">
+          <p>No event logs uploaded yet.</p>
+          <a href="{% url 'uploads_list' %}" class="pm-btn pm-btn-primary">Upload Your First Log</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="pm-main-panel">
+    {% if selected_log %}
+      <div class="pm-welcome-card">
+        <h1>{{ selected_log.name }}</h1>
+        <p>Event log ready for preprocessing. Click on the steps below to begin.</p>
+      </div>
+    {% else %}
+      <div class="pm-welcome-card">
+        <h1>Welcome to Process Mining Platform</h1>
+        <p>Select an event log from the sidebar or upload a new one to get started.</p>
+        
+        <div class="pm-features-grid">
+          <div class="pm-feature">
+            <div class="pm-feature-icon">📊</div>
+            <h3>Smart Clean</h3>
+            <p>Automated data preprocessing and cleaning using Group 3's advanced algorithms.</p>
+          </div>
+          <div class="pm-feature">
+            <div class="pm-feature-icon">🔍</div>
+            <h3>Process Discovery</h3>
+            <p>Discover process models from your event logs using Alpha & Heuristics Miner.</p>
+          </div>
+          <div class="pm-feature">
+            <div class="pm-feature-icon">📈</div>
+            <h3>Visualization</h3>
+            <p>Interactive process graphs and statistics (Coming soon - Group 5).</p>
+          </div>
+          <div class="pm-feature">
+            <div class="pm-feature-icon">✅</div>
+            <h3>Conformance Checking</h3>
+            <p>Validate process execution against models (Coming soon - Group 6).</p>
+          </div>
+          <div class="pm-feature">
+            <div class="pm-feature-icon">🔮</div>
+            <h3>Predictive Monitoring</h3>
+            <p>Predict future outcomes and bottlenecks (Coming soon - Group 7).</p>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+.pm-dashboard {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 20px;
+  min-height: 600px;
+}
+
+.pm-sidebar {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 0;
+  height: fit-content;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+.pm-sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
+}
+
+.pm-sidebar-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #212529;
+}
+
+.pm-log-list {
+  padding: 0;
+}
+
+.pm-log-item {
+  display: block;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f3f5;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s;
+}
+
+.pm-log-item:hover {
+  background: #f8f9fa;
+}
+
+.pm-log-item-active {
+  background: #e7f3ff;
+  border-left: 3px solid #007bff;
+}
+
+.pm-log-item-name {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #212529;
+  font-size: 14px;
+}
+
+.pm-log-item-meta {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.pm-log-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.pm-log-badge-csv {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.pm-log-badge-xes {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.pm-log-badge-parquet {
+  background: #d4edda;
+  color: #155724;
+}
+
+.pm-log-badge-cleaned {
+  background: #d4edda;
+  color: #155724;
+}
+
+.pm-log-item-stats {
+  font-size: 13px;
+  color: #495057;
+  font-weight: 500;
+}
+
+.pm-empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: #495057;
+}
+
+.pm-empty-state p {
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.pm-main-panel {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 40px;
+}
+
+.pm-welcome-card h1 {
+  margin: 0 0 16px 0;
+  color: #212529;
+}
+
+.pm-welcome-card > p {
+  color: #495057;
+  margin-bottom: 40px;
+  font-size: 15px;
+}
+
+.pm-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.pm-feature {
+  padding: 24px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.pm-feature:hover {
+  border-color: #007bff;
+  box-shadow: 0 4px 12px rgba(0,123,255,0.1);
+}
+
+.pm-feature-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+.pm-feature h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  color: #212529;
+}
+
+.pm-feature p {
+  margin: 0;
+  font-size: 14px;
+  color: #495057;
+  line-height: 1.5;
+}
+
+.pm-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.pm-btn-primary {
+  background: #007bff;
+  color: white;
+}
+
+.pm-btn-primary:hover {
+  background: #0056b3;
+}
+
+.pm-btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .pm-dashboard {
+    grid-template-columns: 1fr;
+  }
+  
+  .pm-sidebar {
+    max-height: 400px;
+  }
+}
+</style>
+{% endblock %}

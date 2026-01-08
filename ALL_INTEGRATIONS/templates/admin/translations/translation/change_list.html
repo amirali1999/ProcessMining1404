@@ -1,0 +1,184 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block content %}
+<!-- Section 1: Manage Translations -->
+<div style="margin-bottom: 2.5rem;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 0.5rem; overflow: hidden;">
+        <!-- Section Header -->
+        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 1rem 1.5rem; border-bottom: 2px solid var(--primary);">
+            <h2 style="color: var(--primary); font-size: 20px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.75rem; letter-spacing: 0.5px;">
+                <span style="font-size: 24px;">🌐</span>
+                Manage Translations
+            </h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin: 0.5rem 0 0 2.25rem;">
+                View, search, and manage bilingual translations (Persian/English)
+            </p>
+        </div>
+        
+        <!-- Content from parent template (search, filters, table) -->
+        <div style="padding: 0;">
+            {{ block.super }}
+        </div>
+    </div>
+</div>
+
+<!-- Section 2: Add New Translation -->
+<div style="margin-bottom: 2rem;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 0.5rem; overflow: hidden;">
+        <!-- Section Header -->
+        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 1rem 1.5rem; border-bottom: 2px solid var(--primary);">
+            <h2 style="color: var(--primary); font-size: 20px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.75rem; letter-spacing: 0.5px;">
+                <span style="font-size: 24px;">➕</span>
+                Add New Translation
+            </h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin: 0.5rem 0 0 2.25rem;">
+                Create a new translation entry with Persian and English versions
+            </p>
+        </div>
+        
+        <!-- Form Container -->
+        <div style="padding: 2rem;">
+            <form method="post" action="{% url 'admin:translations_translation_add' %}">
+                {% csrf_token %}
+                
+                <!-- Phrase Field -->
+                <div style="margin-bottom: 2rem;">
+                    <label for="id_phrase" style="display: block; color: var(--text-secondary); font-weight: 600; font-size: 14px; margin-bottom: 0.625rem;">
+                        Phrase Key <span style="color: #ef4444; font-weight: 700;">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        name="phrase" 
+                        id="id_phrase" 
+                        required
+                        maxlength="100"
+                        style="width: 100%; max-width: 600px; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 0.5rem; padding: 0.875rem 1.25rem; font-size: 15px; font-weight: 500; transition: all 0.2s ease;"
+                        placeholder="e.g., user_id, welcome_message, dashboard_title"
+                    />
+                    <small style="display: block; color: var(--text-muted); font-size: 12px; margin-top: 0.625rem; line-height: 1.5;">
+                        🔑 Unique identifier for this translation (max 100 characters, use underscores)
+                    </small>
+                </div>
+                
+                <!-- Persian Translation Field -->
+                <div style="margin-bottom: 2rem;">
+                    <label for="id_fa" style="display: block; color: var(--text-secondary); font-weight: 600; font-size: 14px; margin-bottom: 0.625rem;">
+                        Persian Translation (فارسی) <span style="color: #ef4444; font-weight: 700;">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        name="fa" 
+                        id="id_fa" 
+                        required
+                        maxlength="500"
+                        dir="rtl"
+                        style="width: 100%; max-width: 600px; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 0.5rem; padding: 0.875rem 1.25rem; font-size: 15px; font-weight: 500; transition: all 0.2s ease; text-align: right;"
+                        placeholder="متن فارسی را اینجا وارد کنید"
+                    />
+                    <small style="display: block; color: var(--text-muted); font-size: 12px; margin-top: 0.625rem; line-height: 1.5; text-align: right; direction: rtl;">
+                        🇮🇷 متن فارسی برای این عبارت (حداکثر 500 کاراکتر)
+                    </small>
+                </div>
+                
+                <!-- English Translation Field -->
+                <div style="margin-bottom: 2rem;">
+                    <label for="id_en" style="display: block; color: var(--text-secondary); font-weight: 600; font-size: 14px; margin-bottom: 0.625rem;">
+                        English Translation <span style="color: #ef4444; font-weight: 700;">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        name="en" 
+                        id="id_en" 
+                        required
+                        maxlength="500"
+                        style="width: 100%; max-width: 600px; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 0.5rem; padding: 0.875rem 1.25rem; font-size: 15px; font-weight: 500; transition: all 0.2s ease;"
+                        placeholder="Enter English text here"
+                    />
+                    <small style="display: block; color: var(--text-muted); font-size: 12px; margin-top: 0.625rem; line-height: 1.5;">
+                        🇺🇸 English text for this phrase (max 500 characters)
+                    </small>
+                </div>
+                
+                <!-- Info Box -->
+                <div style="margin-bottom: 2rem; padding: 1.25rem; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 0.5rem;">
+                    <div style="display: flex; align-items: start; gap: 0.75rem;">
+                        <span style="font-size: 20px; flex-shrink: 0; margin-top: 2px;">💡</span>
+                        <div>
+                            <p style="color: var(--text-primary); font-weight: 600; font-size: 14px; margin: 0 0 0.5rem 0;">
+                                Translation Guidelines
+                            </p>
+                            <ul style="color: var(--text-muted); font-size: 13px; margin: 0; padding-left: 1.25rem; line-height: 1.7;">
+                                <li>Use snake_case for phrase keys (e.g., "user_profile", "welcome_message")</li>
+                                <li>Keep translations consistent in tone and style</li>
+                                <li>Phrase keys must be unique across the system</li>
+                                <li>Use proper grammar and punctuation in both languages</li>
+                                <li>Avoid using abbreviations unless they're widely understood</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Submit Buttons -->
+                <div style="display: flex; flex-wrap: wrap; gap: 0.875rem; padding-top: 1.25rem; border-top: 2px solid var(--border-color);">
+                    <button type="submit" name="_save"
+                        style="background: var(--primary); color: #001b0f; border: none; border-radius: 0.5rem; padding: 0.75rem 2rem; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.625rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);"
+                        onmouseover="this.style.background='var(--primary-dark)'; this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.background='var(--primary)'; this.style.transform='translateY(0)'">
+                        <span style="font-size: 18px;">💾</span>
+                        <span>Save</span>
+                    </button>
+                    
+                    <button type="submit" name="_addanother"
+                        style="background: transparent; color: var(--primary); border: 2px solid var(--primary); border-radius: 0.5rem; padding: 0.75rem 1.75rem; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.625rem;"
+                        onmouseover="this.style.background='rgba(16, 185, 129, 0.1)'"
+                        onmouseout="this.style.background='transparent'">
+                        <span style="font-size: 18px;">➕</span>
+                        <span>Save and add another</span>
+                    </button>
+                    
+                    <button type="submit" name="_continue"
+                        style="background: transparent; color: var(--text-secondary); border: 2px solid var(--border-color); border-radius: 0.5rem; padding: 0.75rem 1.75rem; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.625rem;"
+                        onmouseover="this.style.borderColor='var(--text-secondary)'; this.style.background='rgba(203, 213, 225, 0.05)'"
+                        onmouseout="this.style.borderColor='var(--border-color)'; this.style.background='transparent'">
+                        <span style="font-size: 18px;">✏️</span>
+                        <span>Save and continue editing</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.model-translation.change-list #content-main {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.model-translation.change-list #content-main > * {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+#id_phrase:focus,
+#id_fa:focus,
+#id_en:focus {
+    outline: none !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15) !important;
+}
+
+@media (max-width: 768px) {
+    form > div:last-of-type {
+        flex-direction: column !important;
+    }
+    #id_phrase,
+    #id_fa,
+    #id_en {
+        max-width: 100% !important;
+    }
+}
+</style>
+
+{% endblock %}

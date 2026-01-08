@@ -1,0 +1,6 @@
+Training completed at: 2025-11-23 06:37:18.325219
+XES file: HospitalBilling-EventLog_1_all/HospitalBilling-EventLog.xes
+Number of cases: 100000
+Number of events: 451255
+Unique activities: 18
+Activity vocabulary size: 20

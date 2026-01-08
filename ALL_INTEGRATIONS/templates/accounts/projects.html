@@ -1,0 +1,179 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Projects - Process Mining</title>
+    <link rel="stylesheet" href="{% static 'accounts/css/projects.css' %}" />
+  </head>
+  <body>
+    <div class="projects-container">
+      <!-- Top Header -->
+      <header class="projects-header">
+        <div class="header-left">
+          <span class="header-icon">📊</span>
+          <span class="header-text"
+            >Project: <span class="project-name">New project</span></span
+          >
+        </div>
+        <div class="header-right">
+          <div class="header-tool">
+            <div class="tool-icon">➕</div>
+            <div class="tool-label">New</div>
+          </div>
+          <div class="header-tool">
+            <div class="tool-icon">📤</div>
+            <div class="tool-label">Export</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content: 3 Columns -->
+      <div class="projects-main">
+        <!-- Left Sidebar: Datasets List -->
+        <aside class="datasets-sidebar">
+          <div class="sidebar-header">Data sets</div>
+          <div class="datasets-list">
+            {% for project in projects %}
+            <div
+              class="dataset-item {% if forloop.first %}active{% endif %}"
+              data-name="{{ project.name }}"
+              data-title="{{ project.name }}"
+              data-start="{{ project.created_at|date:'Y-m-d H:i' }}"
+              data-end="{{ project.created_at|date:'Y-m-d H:i' }}"
+              data-activities="N/A"
+              data-events="N/A"
+              data-cases="N/A"
+              data-map-url="{% if project.map_url %}{{ project.map_url }}{% endif %}"
+            >
+              <div class="dataset-icon">📄</div>
+              <div class="dataset-info">
+                <div class="dataset-title">{{ project.name }}</div>
+                <div class="dataset-subtitle">
+                  {{ project.created_at|date:"Y-m-d H:i" }}
+                </div>
+              </div>
+              <div class="dataset-chevron">›</div>
+            </div>
+            {% empty %}
+            <!-- No projects - render nothing -->
+            {% endfor %}
+          </div>
+        </aside>
+
+        <!-- Center Workspace: Map Preview -->
+        <section class="workspace-center">
+          <div class="workspace-header">
+            Data set:
+            <span class="workspace-dataset-name">
+              {% if projects %}{{ projects.0.name }}{% else %}No projects{% endif %}
+            </span>
+          </div>
+          <div class="map-preview-container">
+            <div class="map-preview">
+              {% if projects and projects.0.map_url %}
+              <img
+                src="{{ projects.0.map_url }}"
+                alt="Process Map for {{ projects.0.name }}"
+                style="max-width: 100%; max-height: 100%; object-fit: contain"
+              />
+              {% else %}
+              <div class="map-placeholder">
+                <div style="text-align: center; padding: 40px">
+                  <p style="font-size: 24px; margin-bottom: 10px">📊</p>
+                  <p style="font-size: 14px; color: #666">
+                    Process Map Visualization Area
+                  </p>
+                  <p style="font-size: 12px; color: #999; margin-top: 5px">
+                    {% if projects %} Select a project to view its process
+                    map.<br />
+                    <small style="color: #999"
+                      >Note: Process maps are generated after file upload is
+                      complete.</small
+                    >
+                    {% else %} No projects available. Upload a file to create a
+                    new project. {% endif %}
+                  </p>
+                </div>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </section>
+
+        <!-- Right Details Panel -->
+        <aside class="details-panel">
+          <div class="details-content">
+            <div class="detail-row">
+              <div class="detail-label">Activities:</div>
+              <div class="detail-value" id="detail-activities">13</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Start:</div>
+              <div class="detail-value" id="detail-start">2024-01-15 08:00</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">End:</div>
+              <div class="detail-value" id="detail-end">2024-01-20 17:30</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Events:</div>
+              <div class="detail-value" id="detail-events">104</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Cases:</div>
+              <div class="detail-value" id="detail-cases">8</div>
+            </div>
+          </div>
+          <div class="details-actions">
+            <button class="action-btn details-btn">
+              <span class="btn-icon">📋</span>
+              <span class="btn-label">View details</span>
+            </button>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Notes Section (spans center + right) -->
+      <div class="notes-section">
+        <div class="notes-label">Notes:</div>
+        <div class="notes-content">
+          Log read from file "Sepsis Cases - Event Log.xes" on 2024-01-15.
+          Contains 104 events across 8 cases with 13 distinct activities. Data
+          represents a medical process for sepsis treatment cases.
+        </div>
+      </div>
+
+      <!-- Bottom Toolbar -->
+      <footer class="projects-toolbar">
+        <div class="toolbar-left">
+          <div class="toolbar-tool">
+            <div class="tool-icon">🔍</div>
+            <div class="tool-label">Filter</div>
+          </div>
+          <div class="toolbar-tool">
+            <div class="tool-icon">⏱️</div>
+            <div class="tool-label">TimeWarp</div>
+          </div>
+        </div>
+        <div class="toolbar-right">
+          <div class="toolbar-tool">
+            <div class="tool-icon">📋</div>
+            <div class="tool-label">Copy</div>
+          </div>
+          <div class="toolbar-tool">
+            <div class="tool-icon">🗑️</div>
+            <div class="tool-label">Delete</div>
+          </div>
+          <div class="toolbar-tool">
+            <div class="tool-icon">📤</div>
+            <div class="tool-label">Export</div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script src="{% static 'accounts/js/projects.js' %}"></script>
+  </body>
+</html>

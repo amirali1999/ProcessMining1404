@@ -1,0 +1,987 @@
+{% extends "base.html" %}
+{% load static %}
+{% load l10n %}
+
+{% block title %}Discovery - {{ event_log.name }}{% endblock %}
+
+{% block content %}
+<div class="pm-container">
+  <!-- Disco-like Step Bar -->
+  <div class="pm-step-bar">
+    <a href="{% url 'preprocessing_dashboard' %}" class="pm-step pm-step-link">
+      <div class="pm-step-number">1</div>
+      <div class="pm-step-label">Upload</div>
+    </a>
+    <a href="{% url 'smart_clean' event_log.id %}" class="pm-step pm-step-link">
+      <div class="pm-step-number">2</div>
+      <div class="pm-step-label">Smart Clean</div>
+    </a>
+    <div class="pm-step pm-step-active">
+      <div class="pm-step-number">3</div>
+      <div class="pm-step-label">Discovery</div>
+    </div>
+    {% if discovered_models %}
+    <a href="{% url 'visualize_model' discovered_models.0.id %}" class="pm-step pm-step-link">
+      <div class="pm-step-number">4</div>
+      <div class="pm-step-label">Visualization</div>
+    </a>
+    {% else %}
+    <div class="pm-step pm-step-disabled">
+      <div class="pm-step-number">4</div>
+      <div class="pm-step-label">Visualization</div>
+    </div>
+    {% endif %}
+    {% if discovered_models %}
+    <a href="{% url 'conformance_view' event_log.id %}" class="pm-step pm-step-link">
+      <div class="pm-step-number">5</div>
+      <div class="pm-step-label">Conformance</div>
+    </a>
+    {% else %}
+    <div class="pm-step pm-step-disabled">
+      <div class="pm-step-number">5</div>
+      <div class="pm-step-label">Conformance</div>
+    </div>
+    {% endif %}
+    <a href="/prediction/" class="pm-step pm-step-link">
+      <div class="pm-step-number">6</div>
+      <div class="pm-step-label">Prediction</div>
+    </a>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="pm-main-content">
+    <!-- Log Info Card -->
+    <div class="pm-card pm-log-info-card">
+      <h2>{{ event_log.name }}</h2>
+      <div class="pm-stats-grid">
+        <div class="pm-stat">
+          <label>File Type:</label>
+          <span>{{ event_log.file_type|upper }}</span>
+        </div>
+        <div class="pm-stat">
+          <label>Cases:</label>
+          <span id="stat-cases">{{ raw_stats.num_cases|default:"—" }}</span>
+        </div>
+        <div class="pm-stat">
+          <label>Events:</label>
+          <span id="stat-events">{{ raw_stats.num_events|default:"—" }}</span>
+        </div>
+        <div class="pm-stat">
+          <label>Activities:</label>
+          <span id="stat-activities">{{ raw_stats.num_activities|default:"—" }}</span>
+        </div>
+      </div>
+
+      <!-- Source Version Selector -->
+      <div class="pm-source-selector">
+        <label>Discover from:</label>
+        <div class="pm-radio-group">
+          <label class="pm-radio">
+            <input type="radio" name="source_version" value="raw" checked>
+            <span>RAW log</span>
+          </label>
+          <label class="pm-radio">
+            <input type="radio" name="source_version" value="cleaned"
+                   {% if not has_cleaned %}disabled{% endif %}>
+            <span>CLEANED log</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Algorithm Selection -->
+      <div class="pm-algorithm-section">
+        <h3>Select Algorithm</h3>
+        <div class="pm-algorithm-cards">
+          <!-- Alpha Miner Card -->
+          <div class="pm-algo-card">
+            <div class="pm-algo-header">
+              <h4>🔹 Alpha Miner</h4>
+              <span class="pm-badge pm-badge-info">Classic</span>
+            </div>
+            <p>
+              Fast, deterministic algorithm that constructs a process model 
+              based on directly-follows relationships. Best for simple processes.
+            </p>
+            <button class="pm-btn pm-btn-primary" onclick="runDiscovery('alpha')">
+              <span class="pm-btn-icon">▶</span>
+              Run Alpha Miner
+            </button>
+          </div>
+
+          <!-- Heuristics Miner Card -->
+          <div class="pm-algo-card">
+            <div class="pm-algo-header">
+              <h4>🔸 Heuristics Miner</h4>
+              <span class="pm-badge pm-badge-warning">Advanced</span>
+            </div>
+            <p>
+              Handles noise and complex patterns better. Uses statistical 
+              thresholds to filter out infrequent behavior.
+            </p>
+            
+            <!-- Advanced Options (Collapsible) -->
+            <div class="pm-algo-options">
+              <button class="pm-btn-text" onclick="toggleHeuristicsOptions()">
+                <span id="heuristics-toggle-icon">▶</span> Advanced Options
+              </button>
+              <div id="heuristics-options" style="display: none; margin-top: 0.75rem;">
+                <div class="pm-input-group">
+                  <label>Dependency Threshold</label>
+                  <input type="number" id="dependency_threshold" 
+                         min="0" max="1" step="0.1" value="0.5" 
+                         class="pm-input-sm">
+                  <small>Default: 0.5 (higher = stricter)</small>
+                </div>
+                <div class="pm-input-group">
+                  <label>AND Threshold</label>
+                  <input type="number" id="and_threshold" 
+                         min="0" max="1" step="0.1" value="0.1" 
+                         class="pm-input-sm">
+                  <small>Default: 0.1</small>
+                </div>
+                <div class="pm-input-group">
+                  <label>Loop-2 Threshold</label>
+                  <input type="number" id="loop_two_threshold" 
+                         min="0" max="1" step="0.1" value="0.5" 
+                         class="pm-input-sm">
+                  <small>Default: 0.5</small>
+                </div>
+              </div>
+            </div>
+            
+            <button class="pm-btn pm-btn-primary" onclick="runDiscovery('heuristics')" style="margin-top: 1rem;">
+              <span class="pm-btn-icon">▶</span>
+              Run Heuristics Miner
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Messages -->
+    <div id="status-message" class="pm-status-message" style="display: none;"></div>
+
+    <!-- Discovered Models List -->
+    <div class="pm-card pm-models-card">
+      <h3>Discovered Models</h3>
+      <div id="models-list">
+        {% if discovered_models %}
+          {% for model in discovered_models %}
+            <div class="pm-model-item">
+              <div class="pm-model-header">
+                <span class="pm-model-algo">{{ model.get_algorithm_display }}</span>
+                <span class="pm-badge pm-badge-{{ model.source_version }}">
+                  {{ model.source_version|upper }}
+                </span>
+              </div>
+              <div class="pm-model-stats">
+                <span>📍 {{ model.num_places }} places</span>
+                <span>• 🔄 {{ model.num_transitions }} transitions</span>
+                <span>• ➡️ {{ model.num_arcs }} arcs</span>
+                <span>• 📊 Complexity: {{ model.complexity_score }}</span>
+              </div>
+              <div class="pm-model-meta">
+                {% localize off %}
+                <small>
+                  Discovered by {{ model.discovered_by.username|default:"System" }} 
+                  on {{ model.discovered_at|date:"F d, Y" }} at {{ model.discovered_at|date:"H:i" }}
+                </small>
+                {% endlocalize %}
+              </div>
+              <div class="pm-model-actions">
+                <button class="pm-btn pm-btn-sm pm-btn-outline" onclick="viewPNML({{ model.id }})">
+                  View PNML
+                </button>
+                <a href="{% url 'visualize_model' model.id %}" class="pm-btn pm-btn-sm pm-btn-primary">
+                  Visualize
+                </a>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="pm-empty-state">
+            <p>No models discovered yet. Select an algorithm above to begin.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="pm-footer-actions">
+    <a href="{% url 'smart_clean' event_log.id %}" class="pm-btn pm-btn-outline">
+      ← Back to Smart Clean
+    </a>
+    <a href="{% url 'discovery_dashboard' %}" class="pm-btn pm-btn-outline">
+      Back to Dashboard
+    </a>
+  </div>
+</div>
+
+<!-- PNML Modal -->
+<div id="pnml-modal" class="pm-modal" style="display: none;">
+  <div class="pm-modal-content pm-modal-large">
+    <div class="pm-modal-header">
+      <h3>PNML Content</h3>
+      <button class="pm-modal-close" onclick="closePNMLModal()">×</button>
+    </div>
+    <div class="pm-modal-body">
+      <pre id="pnml-content" style="max-height: 500px; overflow-y: auto; background: #f8f9fa; padding: 1rem; border-radius: 4px; font-size: 12px; color: #212529; font-family: 'Courier New', monospace;"></pre>
+    </div>
+    <div class="pm-modal-footer">
+      <button class="pm-btn pm-btn-secondary" onclick="copyPNML()">Copy</button>
+      <button class="pm-btn pm-btn-outline" onclick="closePNMLModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Visualization Modal (Group 5) -->
+<div id="visualization-modal" class="pm-modal" style="display: none;">
+  <div class="pm-modal-content pm-modal-large">
+    <div class="pm-modal-header">
+      <h3 id="visualization-title">Process Model Visualization</h3>
+      <button class="pm-modal-close" onclick="closeVisualizationModal()">×</button>
+    </div>
+    <div class="pm-modal-body" style="text-align: center;">
+      <div id="visualization-loading" style="padding: 3rem;">
+        <div style="font-size: 2rem; margin-bottom: 1rem;">⏳</div>
+        <p>Loading visualization...</p>
+      </div>
+      <img id="visualization-image" 
+           src="" 
+           alt="Petri Net Visualization" 
+           style="max-width: 100%; height: auto; display: none; border: 1px solid #dee2e6; border-radius: 4px;" />
+    </div>
+    <div class="pm-modal-footer">
+      <button class="pm-btn pm-btn-outline" onclick="closeVisualizationModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Step Bar Styles */
+.pm-step-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.pm-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+}
+
+.pm-step-link {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pm-step-link:hover .pm-step-number {
+  background: #0056b3;
+  color: white;
+  transform: scale(1.1);
+}
+
+.pm-step-link:hover .pm-step-label {
+  color: #0056b3;
+}
+
+.pm-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 60%;
+  width: 80%;
+  height: 2px;
+  background: #dee2e6;
+}
+
+.pm-step-active::after {
+  background: #007bff;
+}
+
+.pm-step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #dee2e6;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-bottom: 8px;
+  z-index: 1;
+}
+
+.pm-step-active .pm-step-number {
+  background: #007bff;
+  color: white;
+}
+
+.pm-step-label {
+  font-size: 14px;
+  color: #495057;
+  font-weight: 500;
+}
+
+.pm-step-active .pm-step-label {
+  color: #007bff;
+  font-weight: 600;
+}
+
+.pm-step-disabled .pm-step-label {
+  color: #868e96;
+}
+
+/* Badges */
+.pm-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.pm-badge-raw {
+  background-color: #e7f3ff;
+  color: #004085;
+}
+
+.pm-badge-cleaned {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.pm-badge-info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.pm-badge-warning {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+/* Main Layout */
+.pm-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.pm-card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.pm-log-info-card h2 {
+  margin: 0 0 20px 0;
+  color: #212529;
+  font-weight: 600;
+}
+
+.pm-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.pm-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.pm-stat label {
+  font-size: 13px;
+  color: #495057;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.pm-stat span {
+  font-size: 20px;
+  color: #212529;
+  font-weight: 600;
+}
+
+/* Source Selector */
+.pm-source-selector {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.pm-source-selector > label {
+  display: block;
+  font-size: 14px;
+  color: #212529;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.pm-radio-group {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.pm-radio {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 14px;
+  color: #212529;
+}
+
+.pm-radio input[type="radio"] {
+  cursor: pointer;
+}
+
+.pm-radio input[type="radio"]:disabled {
+  cursor: not-allowed;
+}
+
+.pm-radio:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Status Messages */
+.pm-status-message {
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.pm-status-info {
+  background: #cfe2ff;
+  color: #084298;
+  border: 1px solid #b6d4fe;
+}
+
+.pm-status-success {
+  background: #d1e7dd;
+  color: #0f5132;
+  border: 1px solid #badbcc;
+}
+
+.pm-status-error {
+  background: #f8d7da;
+  color: #842029;
+  border: 1px solid #f5c2c7;
+}
+
+/* Buttons */
+.pm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.pm-btn-primary {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.pm-btn-primary:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
+.pm-btn-secondary {
+  background: #6c757d;
+  color: white;
+  border-color: #6c757d;
+}
+
+.pm-btn-secondary:hover {
+  background: #545b62;
+  border-color: #545b62;
+}
+
+.pm-btn-outline {
+  background: white;
+  color: #6c757d;
+  border-color: #dee2e6;
+}
+
+.pm-btn-outline:hover {
+  background: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.pm-btn-icon {
+  font-size: 16px;
+}
+
+.pm-footer-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Algorithm Section */
+.pm-algorithm-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.pm-algorithm-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  color: #212529;
+  font-weight: 600;
+}
+
+.pm-algorithm-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.pm-algo-card {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 1.25rem;
+  background: #f8f9fa;
+  transition: all 0.2s;
+}
+
+.pm-algo-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background: white;
+}
+
+.pm-algo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.pm-algo-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #212529;
+  font-weight: 600;
+}
+
+.pm-algo-card p {
+  margin: 0 0 1rem 0;
+  font-size: 14px;
+  color: #495057;
+  line-height: 1.5;
+}
+
+.pm-algo-options {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.pm-btn-text {
+  background: none;
+  border: none;
+  color: #0d6efd;
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.pm-btn-text:hover {
+  text-decoration: underline;
+}
+
+.pm-input-group {
+  margin-bottom: 0.75rem;
+}
+
+.pm-input-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #212529;
+  margin-bottom: 0.25rem;
+}
+
+.pm-input-group small {
+  display: block;
+  font-size: 12px;
+  color: #868e96;
+  margin-top: 0.25rem;
+}
+
+.pm-input-sm {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.pm-models-card {
+  margin-top: 1.5rem;
+}
+
+.pm-models-card h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  color: #212529;
+  font-weight: 600;
+}
+
+#models-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pm-model-item {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 1rem;
+  background: white;
+}
+
+.pm-model-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.pm-model-algo {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.pm-model-stats {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+  font-size: 13px;
+  color: #495057;
+  font-weight: 500;
+}
+
+.pm-model-meta {
+  margin-bottom: 0.75rem;
+}
+
+.pm-model-meta small {
+  font-size: 12px;
+  color: #868e96;
+}
+
+.pm-model-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pm-btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 13px;
+}
+
+.pm-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.pm-modal-content {
+  background: white;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.pm-modal-large {
+  max-width: 900px;
+}
+
+.pm-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.pm-modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #212529;
+  font-weight: 600;
+}
+
+.pm-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pm-modal-close:hover {
+  color: #212529;
+}
+
+.pm-modal-body {
+  padding: 1.25rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.pm-modal-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+</style>
+
+<script>
+const LOG_ID = {{ event_log.id }};
+
+// Statistics for RAW and CLEANED
+const STATS = {
+  raw: {
+    cases: '{{ raw_stats.num_cases|default:"—" }}',
+    events: '{{ raw_stats.num_events|default:"—" }}',
+    activities: '{{ raw_stats.num_activities|default:"—" }}'
+  },
+  cleaned: {
+    cases: '{{ cleaned_stats.num_cases|default:"—" }}',
+    events: '{{ cleaned_stats.num_events|default:"—" }}',
+    activities: '{{ cleaned_stats.num_activities|default:"—" }}'
+  }
+};
+
+// CSRF Token
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+
+// Update statistics when source version changes
+document.querySelectorAll('input[name="source_version"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    const source = this.value;
+    const stats = STATS[source];
+    
+    document.getElementById('stat-cases').textContent = stats.cases;
+    document.getElementById('stat-events').textContent = stats.events;
+    document.getElementById('stat-activities').textContent = stats.activities;
+  });
+});
+
+// Show status message
+function showStatus(message, type = 'info') {
+  const statusEl = document.getElementById('status-message');
+  statusEl.textContent = message;
+  statusEl.className = `pm-status-message pm-status-${type}`;
+  statusEl.style.display = 'block';
+  
+  if (type === 'success' || type === 'info') {
+    setTimeout(() => {
+      statusEl.style.display = 'none';
+    }, 5000);
+  }
+}
+
+// Toggle Heuristics Options
+function toggleHeuristicsOptions() {
+  const optionsEl = document.getElementById('heuristics-options');
+  const iconEl = document.getElementById('heuristics-toggle-icon');
+  
+  if (optionsEl.style.display === 'none') {
+    optionsEl.style.display = 'block';
+    iconEl.textContent = '▼';
+  } else {
+    optionsEl.style.display = 'none';
+    iconEl.textContent = '▶';
+  }
+}
+
+// Run Discovery Algorithm
+async function runDiscovery(algorithm) {
+  const source = document.querySelector('input[name="source_version"]:checked').value;
+  
+  // Prepare request body
+  const body = { source };
+  
+  // Add heuristics parameters if applicable
+  if (algorithm === 'heuristics') {
+    body.dependency_threshold = parseFloat(document.getElementById('dependency_threshold').value);
+    body.and_threshold = parseFloat(document.getElementById('and_threshold').value);
+    body.loop_two_threshold = parseFloat(document.getElementById('loop_two_threshold').value);
+  }
+  
+  showStatus(`Running ${algorithm === 'alpha' ? 'Alpha' : 'Heuristics'} Miner... This may take a moment.`, 'info');
+  
+  try {
+    const response = await fetch(`/api/event-logs/${LOG_ID}/discovery/${algorithm}/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken
+      },
+      body: JSON.stringify(body)
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Discovery failed');
+    }
+    
+    showStatus(`✅ ${algorithm === 'alpha' ? 'Alpha' : 'Heuristics'} Miner completed successfully!`, 'success');
+    
+    // Reload the page to show the new model
+    setTimeout(() => {
+      location.reload();
+    }, 1500);
+    
+  } catch (error) {
+    showStatus(`❌ Error: ${error.message}`, 'error');
+  }
+}
+
+// View PNML Content
+async function viewPNML(modelId) {
+  try {
+    const response = await fetch(`/api/discovered-models/${modelId}/pnml/`);
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to fetch PNML');
+    }
+    
+    // Show modal with PNML content
+    document.getElementById('pnml-content').textContent = data.pnml_content;
+    document.getElementById('pnml-modal').style.display = 'flex';
+    
+  } catch (error) {
+    showStatus(`❌ Error: ${error.message}`, 'error');
+  }
+}
+
+// Close PNML Modal
+function closePNMLModal() {
+  document.getElementById('pnml-modal').style.display = 'none';
+}
+
+// Copy PNML to Clipboard
+function copyPNML() {
+  const content = document.getElementById('pnml-content').textContent;
+  navigator.clipboard.writeText(content).then(() => {
+    showStatus('✅ PNML copied to clipboard!', 'success');
+  }).catch(err => {
+    showStatus('❌ Failed to copy: ' + err.message, 'error');
+  });
+}
+
+// Visualize Model (Group 5)
+function visualizeModel(modelId) {
+  const modal = document.getElementById('visualization-modal');
+  const img = document.getElementById('visualization-image');
+  const title = document.getElementById('visualization-title');
+  const loading = document.getElementById('visualization-loading');
+  
+  // Show modal
+  modal.style.display = 'flex';
+  loading.style.display = 'block';
+  img.style.display = 'none';
+  title.textContent = `Process Model #${modelId}`;
+  
+  // Load image
+  img.src = `/api/discovered-models/${modelId}/petrinet-image/`;
+  img.onload = function() {
+    loading.style.display = 'none';
+    img.style.display = 'block';
+  };
+  img.onerror = function() {
+    loading.innerHTML = '<p style="color: #dc3545;">❌ Failed to load visualization</p>';
+  };
+}
+
+function closeVisualizationModal() {
+  const modal = document.getElementById('visualization-modal');
+  modal.style.display = 'none';
+}
+
+// Close modals when clicking outside
+document.addEventListener('click', function(event) {
+  const pnmlModal = document.getElementById('pnml-modal');
+  const vizModal = document.getElementById('visualization-modal');
+  
+  if (event.target === pnmlModal) {
+    closePNMLModal();
+  }
+  
+  if (event.target === vizModal) {
+    closeVisualizationModal();
+  }
+});
+</script>
+{% endblock %}

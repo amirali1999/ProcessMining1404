@@ -1,0 +1,1182 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Process Mining Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+  </head>
+  <body>
+    <div class="dashboard-container">      <!-- Top Bar -->
+      <div class="top-bar">
+        <!-- Row 1: Controls and Tabs -->
+        <div class="top-bar-row-1">
+          <!-- Left Section: File Controls -->
+          <div class="top-bar-left">
+            <button class="icon-button" id="open-btn" title="Open">📁</button>
+            <input
+              type="file"
+              id="file-input"
+              accept=".csv,.xes,.xes.gz"
+              style="display: none"
+            />
+            <a
+              href="{% url 'projects' %}"
+              class="icon-button"
+              title="Show project browser"
+              style="
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+              "
+              >📦</a
+            >
+            <select class="log-dropdown" id="log-dropdown">
+              <option value="">Select Event Log...</option>
+              {% for project in projects %}
+              <option value="{{ project }}" {% if project == selected_project %}selected{% endif %}>{{ project }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <!-- Center Section: Tabs -->
+          <div class="top-bar-center">
+            <div class="tabs-group">
+              <button class="tab-button active" data-tab="map">Map</button>
+              <button class="tab-button" data-tab="statistics">Statistics</button>
+              <button class="tab-button" data-tab="cases">Cases</button>
+            </div>
+          </div>
+          
+          <!-- Right Section: License & Logout -->
+          <div class="top-bar-right">
+            {% if user.is_premium %}
+              <span style="
+                padding: 6px 12px;
+                background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+                color: #000;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 600;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+              ">
+                👑 PREMIUM
+              </span>
+            {% else %}
+              <a
+                href="{% url 'activate_license' %}"
+                style="
+                  padding: 6px 16px;
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  color: white;
+                  border-radius: 20px;
+                  font-size: 12px;
+                  font-weight: 600;
+                  text-decoration: none;
+                  display: inline-flex;
+                  align-items: center;
+                  gap: 5px;
+                  transition: transform 0.2s;
+                "
+                onmouseover="this.style.transform='scale(1.05)'"
+                onmouseout="this.style.transform='scale(1)'"
+                title="Upgrade to Premium for unlimited access"
+              >
+                👑 Upgrade to Premium
+              </a>
+              <span style="
+                padding: 6px 12px;
+                background: #e0e0e0;
+                color: #666;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 600;
+              ">
+                FREE
+              </span>
+            {% endif %}
+            
+            <!-- Logout Button -->
+            <a
+              href="{% url 'logout' %}"
+              class="icon-button"
+              title="Logout"
+              style="
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+              "
+              >🚪</a
+            >
+          </div>
+
+          <!-- File upload controls (hidden by default) -->
+          <div
+            id="upload-controls"
+            style="
+              display: none;
+              position: absolute;
+              left: 50%;
+              transform: translateX(-50%);
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            <span
+              id="selected-filename"
+              style="font-size: 13px; color: #666"
+            ></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content Area -->
+      <div class="main-content">
+        <!-- Workspace -->
+        <div class="workspace">          <!-- Tab: Map -->
+          <div class="tab-content active" id="tab-map">
+            {% if latest_job and latest_job.output_map_svg %}
+            <div class="process-map-container">
+              <!-- Zoom Controls -->
+              <div class="zoom-controls">
+                <button class="zoom-btn" id="zoom-in-btn" title="Zoom In">
+                  <span class="zoom-icon">🔍+</span>
+                </button>
+                <span class="zoom-level" id="zoom-level">100%</span>
+                <button class="zoom-btn" id="zoom-out-btn" title="Zoom Out">
+                  <span class="zoom-icon">🔍−</span>
+                </button>
+                <button class="zoom-btn" id="zoom-reset-btn" title="Reset Zoom">
+                  <span class="zoom-icon">↺</span>
+                </button>
+              </div>
+              <div class="process-map-image" id="process-map-viewport">
+                <img
+                  id="process-map-img"
+                  src="{{ latest_job.output_map_svg.url }}"
+                  alt="Process Map"
+                />
+              </div>
+            </div>
+            {% else %}
+            <div class="workspace-placeholder">
+              <p>📊 Process Map Visualization Area</p>
+              <p style="font-size: 12px; color: #999">
+                {% if latest_job %} Processing in progress... Please wait or
+                refresh the page. {% else %} Upload an event log file to
+                generate a process map {% endif %}
+              </p>
+            </div>
+            {% endif %}
+          </div>
+          <!-- Tab: Statistics -->
+          <div class="tab-content" id="tab-statistics">
+            <!-- Statistics 3-Column Layout -->
+            <div class="statistics-layout">
+              <!-- Left Navigation Panel -->
+              <div class="statistics-nav">
+                <div class="statistics-nav-header">Statistics views</div>
+                <div class="statistics-nav-list">
+                  <div class="stat-nav-item active" data-stat="overview">
+                    <div class="stat-nav-icon">📊</div>
+                    <div class="stat-nav-content">
+                      <div class="stat-nav-title">Overview</div>
+                      <div class="stat-nav-subtitle">Global statistics</div>
+                    </div>
+                    <div class="stat-nav-chevron">›</div>
+                  </div>
+
+                  <div class="stat-nav-item" data-stat="activity">
+                    <div class="stat-nav-icon">⚡</div>
+                    <div class="stat-nav-content">
+                      <div class="stat-nav-title">Activity</div>
+                      <div class="stat-nav-subtitle">Activity classes</div>
+                    </div>
+                    <div class="stat-nav-chevron">›</div>
+                  </div>
+
+                  <div class="stat-nav-item" data-stat="lifecycle">
+                    <div class="stat-nav-icon">🔄</div>
+                    <div class="stat-nav-content">
+                      <div class="stat-nav-title">lifecycle:transition</div>
+                      <div class="stat-nav-subtitle">Other attribute</div>
+                    </div>
+                    <div class="stat-nav-chevron">›</div>
+                  </div>
+
+                  <div class="stat-nav-item" data-stat="org">
+                    <div class="stat-nav-icon">👥</div>
+                    <div class="stat-nav-content">
+                      <div class="stat-nav-title">org:group</div>
+                      <div class="stat-nav-subtitle">Other attribute</div>
+                    </div>
+                    <div class="stat-nav-chevron">›</div>
+                  </div>
+
+                  <div class="stat-nav-item" data-stat="infection">
+                    <div class="stat-nav-icon">🦠</div>
+                    <div class="stat-nav-content">
+                      <div class="stat-nav-title">InfectionSuspected</div>
+                      <div class="stat-nav-subtitle">Other attribute</div>
+                    </div>
+                    <div class="stat-nav-chevron">›</div>
+                  </div>
+
+                  <div class="stat-nav-item" data-stat="diagnosis">
+                    <div class="stat-nav-icon">🩺</div>
+                    <div class="stat-nav-content">
+                      <div class="stat-nav-title">DiagnosticArtStiff</div>
+                      <div class="stat-nav-subtitle">Other attribute</div>
+                    </div>
+                    <div class="stat-nav-chevron">›</div>
+                  </div>
+
+                  <div class="stat-nav-item" data-stat="age">
+                    <div class="stat-nav-icon">📅</div>
+                    <div class="stat-nav-content">
+                      <div class="stat-nav-title">Age</div>
+                      <div class="stat-nav-subtitle">Other attribute</div>
+                    </div>
+                    <div class="stat-nav-chevron">›</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Center + Right Container -->
+              <div class="statistics-main">
+                <!-- Center Chart Area -->
+                <div class="statistics-center">
+                  <!-- Attribute Header -->
+                  <div class="attribute-header">
+                    <div class="attribute-title">Overview</div>
+                    <div class="attribute-subtitle">Global statistics</div>
+                  </div>
+
+                  <!-- Chart Container -->
+                  <div class="chart-container">
+                    <div class="chart-tools">
+                      <button class="chart-tool-btn" title="Download">⬇</button>
+                      <button class="chart-tool-btn" title="Settings">⚙</button>
+                      <button class="chart-tool-btn" title="Fullscreen">
+                        ⛶
+                      </button>
+                    </div>
+                    <div class="chart-placeholder">
+                      <div class="chart-content">
+                        📊 Chart will be rendered here
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Segmented Control -->
+                  <div class="segmented-control">
+                    <button class="segment-btn active" data-segment="all">
+                      All values
+                    </button>
+                    <button class="segment-btn" data-segment="first">
+                      First in case
+                    </button>
+                    <button class="segment-btn" data-segment="last">
+                      Last in case
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Right Summary Panel -->
+                <div class="statistics-summary">
+                  <div class="summary-item">
+                    <div class="summary-label">Values</div>
+                    <div class="summary-value">2</div>
+                  </div>
+
+                  <div class="summary-item">
+                    <div class="summary-label">Minimal frequency</div>
+                    <div class="summary-value">245</div>
+                  </div>
+
+                  <div class="summary-item">
+                    <div class="summary-label">Mean frequency</div>
+                    <div class="summary-value">525.5</div>
+                  </div>
+
+                  <div class="summary-item">
+                    <div class="summary-label">Maximal frequency</div>
+                    <div class="summary-value">806</div>
+                  </div>
+
+                  <div class="summary-item">
+                    <div class="summary-label">Frequency std. deviation</div>
+                    <div class="summary-value">396.88</div>
+                  </div>
+
+                  <div class="summary-item">
+                    <div class="summary-label">Total frequency</div>
+                    <div class="summary-value">1051</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Table Section -->
+            <div class="statistics-table-section">
+              <div class="statistics-table-wrapper">
+                <table class="statistics-table">
+                  <thead>
+                    <tr>
+                      <th>Value</th>
+                      <th>Frequency</th>
+                      <th>Relative frequency</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><span class="value-badge">true</span></td>
+                      <td>806</td>
+                      <td>
+                        <div class="frequency-bar-container">
+                          <div class="frequency-bar" style="width: 76.7%"></div>
+                          <span class="frequency-text">76.7%</span>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><span class="value-badge">false</span></td>
+                      <td>245</td>
+                      <td>
+                        <div class="frequency-bar-container">
+                          <div class="frequency-bar" style="width: 23.3%"></div>
+                          <span class="frequency-text">23.3%</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <!-- Tab: Cases -->
+          <div class="tab-content" id="tab-cases">
+            <!-- Cases Layout -->
+            <div class="cases-layout">
+              <!-- Left Panels Container -->
+              <div class="cases-left-panels">
+                <!-- Variants Panel -->
+                <div class="cases-variants-panel">
+                  <div class="cases-panel-header">Variants (8)</div>
+                  <div class="cases-panel-list">
+                    <div class="case-variant-item active" data-variant="all">
+                      <div class="variant-icon">📊</div>
+                      <div class="variant-content">
+                        <div class="variant-title">Complete log</div>
+                        <div class="variant-subtitle">All cases (8)</div>
+                      </div>
+                      <div class="variant-chevron">›</div>
+                    </div>
+
+                    <div class="case-variant-item" data-variant="1">
+                      <div class="variant-icon">📈</div>
+                      <div class="variant-content">
+                        <div class="variant-title">Variant 1</div>
+                        <div class="variant-subtitle">1 case (12.5%)</div>
+                      </div>
+                      <div class="variant-chevron">›</div>
+                    </div>
+
+                    <div class="case-variant-item" data-variant="2">
+                      <div class="variant-icon">📈</div>
+                      <div class="variant-content">
+                        <div class="variant-title">Variant 2</div>
+                        <div class="variant-subtitle">1 case (12.5%)</div>
+                      </div>
+                      <div class="variant-chevron">›</div>
+                    </div>
+
+                    <div class="case-variant-item" data-variant="3">
+                      <div class="variant-icon">📈</div>
+                      <div class="variant-content">
+                        <div class="variant-title">Variant 3</div>
+                        <div class="variant-subtitle">1 case (12.5%)</div>
+                      </div>
+                      <div class="variant-chevron">›</div>
+                    </div>
+
+                    <div class="case-variant-item" data-variant="4">
+                      <div class="variant-icon">📈</div>
+                      <div class="variant-content">
+                        <div class="variant-title">Variant 4</div>
+                        <div class="variant-subtitle">1 case (12.5%)</div>
+                      </div>
+                      <div class="variant-chevron">›</div>
+                    </div>
+
+                    <div class="case-variant-item" data-variant="5">
+                      <div class="variant-icon">📈</div>
+                      <div class="variant-content">
+                        <div class="variant-title">Variant 5</div>
+                        <div class="variant-subtitle">1 case (12.5%)</div>
+                      </div>
+                      <div class="variant-chevron">›</div>
+                    </div>
+
+                    <div class="case-variant-item" data-variant="6">
+                      <div class="variant-icon">📈</div>
+                      <div class="variant-content">
+                        <div class="variant-title">Variant 6</div>
+                        <div class="variant-subtitle">1 case (12.5%)</div>
+                      </div>
+                      <div class="variant-chevron">›</div>
+                    </div>
+
+                    <div class="case-variant-item" data-variant="7">
+                      <div class="variant-icon">📈</div>
+                      <div class="variant-content">
+                        <div class="variant-title">Variant 7</div>
+                        <div class="variant-subtitle">1 case (12.5%)</div>
+                      </div>
+                      <div class="variant-chevron">›</div>
+                    </div>
+
+                    <div class="case-variant-item" data-variant="8">
+                      <div class="variant-icon">📈</div>
+                      <div class="variant-content">
+                        <div class="variant-title">Variant 8</div>
+                        <div class="variant-subtitle">1 case (12.5%)</div>
+                      </div>
+                      <div class="variant-chevron">›</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cases Panel -->
+                <div class="cases-list-panel">
+                  <div class="cases-panel-header">Cases (1)</div>
+                  <div class="cases-panel-list">
+                    <div class="case-list-item active" data-case="A">
+                      <div class="case-icon">💼</div>
+                      <div class="case-content">
+                        <div class="case-title">A</div>
+                        <div class="case-subtitle">22 events</div>
+                      </div>
+                      <div class="case-chevron">›</div>
+                    </div>
+
+                    <div class="case-list-item" data-case="B">
+                      <div class="case-icon">💼</div>
+                      <div class="case-content">
+                        <div class="case-title">B</div>
+                        <div class="case-subtitle">18 events</div>
+                      </div>
+                      <div class="case-chevron">›</div>
+                    </div>
+
+                    <div class="case-list-item" data-case="C">
+                      <div class="case-icon">💼</div>
+                      <div class="case-content">
+                        <div class="case-title">C</div>
+                        <div class="case-subtitle">25 events</div>
+                      </div>
+                      <div class="case-chevron">›</div>
+                    </div>
+
+                    <div class="case-list-item" data-case="D">
+                      <div class="case-icon">💼</div>
+                      <div class="case-content">
+                        <div class="case-title">D</div>
+                        <div class="case-subtitle">20 events</div>
+                      </div>
+                      <div class="case-chevron">›</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Center + Right Container -->
+              <div class="cases-main-container">
+                <!-- Center Panel (Timeline + Table) -->
+                <div class="cases-center-panel">
+                  <!-- Case Header -->
+                  <div class="case-header">
+                    <div class="case-icon-large">💼</div>
+                    <div class="case-header-content">
+                      <div class="case-id">A</div>
+                      <div class="case-subtitle">Case with 22 events</div>
+                    </div>
+                  </div>
+
+                  <!-- Timeline Container -->
+                  <div class="case-timeline-container">
+                    <div class="timeline-placeholder">
+                      <!-- Dummy timeline bars -->
+                      <div
+                        class="timeline-bar"
+                        style="height: 60%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 40%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 75%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 55%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 90%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 45%; background: #e74c3c"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 80%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 50%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 70%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 65%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 55%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 85%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 50%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 60%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 75%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 40%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 90%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 55%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 70%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 60%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 80%; background: #4a90e2"
+                      ></div>
+                      <div
+                        class="timeline-bar"
+                        style="height: 45%; background: #4a90e2"
+                      ></div>
+                    </div>
+                  </div>
+
+                  <!-- View Toggle -->
+                  <div class="case-view-toggle">
+                    <button class="view-toggle-btn active" data-view="graph">
+                      Graph
+                    </button>
+                    <button class="view-toggle-btn" data-view="table">
+                      Table
+                    </button>
+                  </div>
+
+                  <!-- Events Table -->
+                  <div class="events-table-container">
+                    <table class="events-table">
+                      <thead>
+                        <tr>
+                          <th class="row-number-header">#</th>
+                          <th>Activity</th>
+                          <th>Date</th>
+                          <th>Time</th>
+                          <th>lifecycle:transition</th>
+                          <th>org:group</th>
+                          <th>InfectionSuspected</th>
+                          <th>DiagnosticArtStiff</th>
+                          <th>DisfuncOrg</th>
+                          <th>SIRSCritTwoOrMore</th>
+                          <th>Hypotensie</th>
+                          <th>Hypoxie</th>
+                          <th>Age</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="row-number">1</td>
+                          <td>ER Registration</td>
+                          <td>2014-10-22</td>
+                          <td>11:15:41</td>
+                          <td>complete</td>
+                          <td>ER</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">2</td>
+                          <td>Leucocytes</td>
+                          <td>2014-10-22</td>
+                          <td>11:27:00</td>
+                          <td>complete</td>
+                          <td>ER</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">3</td>
+                          <td>CRP</td>
+                          <td>2014-10-22</td>
+                          <td>11:32:00</td>
+                          <td>complete</td>
+                          <td>ER</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">4</td>
+                          <td>LacticAcid</td>
+                          <td>2014-10-22</td>
+                          <td>11:33:00</td>
+                          <td>complete</td>
+                          <td>ER</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">5</td>
+                          <td>ER Triage</td>
+                          <td>2014-10-22</td>
+                          <td>11:34:15</td>
+                          <td>complete</td>
+                          <td>ER</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">6</td>
+                          <td>ER Sepsis Triage</td>
+                          <td>2014-10-22</td>
+                          <td>11:35:42</td>
+                          <td>complete</td>
+                          <td>ER</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">7</td>
+                          <td>IV Liquid</td>
+                          <td>2014-10-22</td>
+                          <td>12:05:00</td>
+                          <td>complete</td>
+                          <td>ER</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>true</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">8</td>
+                          <td>IV Antibiotics</td>
+                          <td>2014-10-22</td>
+                          <td>12:08:00</td>
+                          <td>complete</td>
+                          <td>ER</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>true</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">9</td>
+                          <td>Admission NC</td>
+                          <td>2014-10-22</td>
+                          <td>12:30:00</td>
+                          <td>complete</td>
+                          <td>ER</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>true</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">10</td>
+                          <td>CRP</td>
+                          <td>2014-10-23</td>
+                          <td>09:00:00</td>
+                          <td>complete</td>
+                          <td>NC</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>true</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">11</td>
+                          <td>Leucocytes</td>
+                          <td>2014-10-23</td>
+                          <td>09:05:00</td>
+                          <td>complete</td>
+                          <td>NC</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>true</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">12</td>
+                          <td>CRP</td>
+                          <td>2014-10-24</td>
+                          <td>08:30:00</td>
+                          <td>complete</td>
+                          <td>NC</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">13</td>
+                          <td>Leucocytes</td>
+                          <td>2014-10-24</td>
+                          <td>08:35:00</td>
+                          <td>complete</td>
+                          <td>NC</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">14</td>
+                          <td>CRP</td>
+                          <td>2014-10-25</td>
+                          <td>09:15:00</td>
+                          <td>complete</td>
+                          <td>NC</td>
+                          <td>true</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">15</td>
+                          <td>Leucocytes</td>
+                          <td>2014-10-25</td>
+                          <td>09:20:00</td>
+                          <td>complete</td>
+                          <td>NC</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">16</td>
+                          <td>CRP</td>
+                          <td>2014-10-26</td>
+                          <td>08:45:00</td>
+                          <td>complete</td>
+                          <td>NC</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">17</td>
+                          <td>Leucocytes</td>
+                          <td>2014-10-26</td>
+                          <td>08:50:00</td>
+                          <td>complete</td>
+                          <td>NC</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">18</td>
+                          <td>CRP</td>
+                          <td>2014-10-27</td>
+                          <td>09:10:00</td>
+                          <td>complete</td>
+                          <td>NC</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">19</td>
+                          <td>Leucocytes</td>
+                          <td>2014-10-27</td>
+                          <td>09:15:00</td>
+                          <td>complete</td>
+                          <td>NC</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">20</td>
+                          <td>Return ER</td>
+                          <td>2014-11-02</td>
+                          <td>14:20:00</td>
+                          <td>complete</td>
+                          <td>ER</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">21</td>
+                          <td>Release A</td>
+                          <td>2014-11-02</td>
+                          <td>15:45:00</td>
+                          <td>complete</td>
+                          <td>ER</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                        <tr>
+                          <td class="row-number">22</td>
+                          <td>Release B</td>
+                          <td>2014-11-02</td>
+                          <td>16:00:00</td>
+                          <td>complete</td>
+                          <td>ER</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>false</td>
+                          <td>85</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Right Summary Panel -->
+                <div class="case-summary-panel">
+                  <div class="summary-item">
+                    <div class="summary-label">Events</div>
+                    <div class="summary-value">22</div>
+                  </div>
+
+                  <div class="summary-item">
+                    <div class="summary-label">Start</div>
+                    <div class="summary-value">22.10.2014</div>
+                    <div class="summary-detail">11:15:41</div>
+                  </div>
+
+                  <div class="summary-item">
+                    <div class="summary-label">End</div>
+                    <div class="summary-value">02.11.2014</div>
+                    <div class="summary-detail">16:00:00</div>
+                  </div>
+
+                  <div class="summary-item">
+                    <div class="summary-label">Duration</div>
+                    <div class="summary-value">11 days, 4 hours</div>
+                    <div class="summary-detail">268 hours, 44 min</div>
+                  </div>
+
+                  <div class="summary-item">
+                    <div class="summary-label">Variant</div>
+                    <div class="summary-value">Variant 1</div>
+                    <div class="summary-detail">1 of 8 variants</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+          <div class="sidebar-header">Detail</div>
+
+          <!-- Panel 1: Activities & Paths Sliders -->
+          <div class="sidebar-panel">
+            <div class="panel-title">Filter</div>
+            <div class="sliders-container">
+              <!-- Activities Slider -->
+              <div class="slider-group">
+                <span class="slider-label">Activities</span>
+                <div class="vertical-slider-wrapper">
+                  <input
+                    type="range"
+                    class="vertical-slider"
+                    id="activities-slider"
+                    min="0"
+                    max="100"
+                    value="100"
+                    orient="vertical"
+                  />
+                  <div class="slider-values">
+                    <span>100%</span>
+                    <span>0%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Paths Slider -->
+              <div class="slider-group">
+                <span class="slider-label">Paths</span>
+                <div class="vertical-slider-wrapper">
+                  <input
+                    type="range"
+                    class="vertical-slider"
+                    id="paths-slider"
+                    min="0"
+                    max="100"
+                    value="0"
+                    orient="vertical"
+                  />
+                  <div class="slider-values">
+                    <span>100%</span>
+                    <span>0%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel 2: Frequency -->
+          <div class="sidebar-panel">
+            <div class="panel-title">Frequency</div>
+            <div class="frequency-controls">
+              <label for="frequency-dropdown">Show:</label>
+              <select id="frequency-dropdown">
+                <option value="absolute">Absolute</option>
+                <option value="relative">Relative</option>
+                <option value="both">Both</option>
+              </select>
+            </div>
+            <div class="legend-placeholder">
+              Legend placeholder<br />
+              (Color scale will appear here)
+            </div>
+            <button class="add-metrics-button" id="add-metrics-btn">
+              ➕ Add secondary metrics
+            </button>
+          </div>
+
+          <!-- Panel 3: Performance -->
+          <div class="sidebar-panel">
+            <div class="panel-title">Performance</div>
+            <div class="performance-placeholder">
+              Performance metrics<br />
+              (Duration, throughput, etc.)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Toolbar -->
+      <div class="bottom-toolbar">
+        <div class="toolbar-group">
+          <button class="toolbar-button">
+            <span class="icon">🔍</span> Filter
+          </button>
+          <button class="toolbar-button">
+            <span class="icon">⏱️</span> TimeWarp
+          </button>
+        </div>
+
+        <div class="toolbar-group map-only-group">
+          <button class="toolbar-button map-only-button">
+            <span class="icon">▶️</span> Animation
+          </button>
+        </div>      </div>
+    </div>
+
+    <!-- Upload Options Modal -->
+    <div id="upload-modal" class="modal-overlay" style="display: none">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h2>Upload Options</h2>
+          <button class="modal-close" id="modal-close-btn">×</button>
+        </div>
+        <div class="modal-body">
+          <!-- Project Name Input -->
+          <div class="modal-field">
+            <label class="modal-label" for="project-name"
+              >Project Name <span style="color: #e74c3c">*</span></label
+            >
+            <input
+              type="text"
+              id="project-name"
+              name="project_name"
+              class="modal-input"
+              placeholder="Enter project name..."
+              required
+            />
+            <p
+              class="modal-hint"
+              id="project-name-error"
+              style="color: #e74c3c; display: none; margin-top: 4px"
+            >
+              Project name is required
+            </p>
+          </div>
+
+          <!-- Cleaning Toggle -->
+          <div class="modal-field">
+            <label class="modal-label">Data Cleaning</label>
+            <div class="toggle-group">
+              <button class="toggle-btn" id="cleaning-no" data-value="false">
+                No
+              </button>
+              <button
+                class="toggle-btn active"
+                id="cleaning-yes"
+                data-value="true"
+              >
+                Yes
+              </button>
+            </div>
+            <p class="modal-hint">Run smart cleaning on the uploaded log?</p>
+          </div>
+
+          <!-- Mining Method Dropdown -->
+          <div class="modal-field">
+            <label class="modal-label" for="mining-method"
+              >Process Mining Method</label
+            >
+            <select id="mining-method" class="modal-select">
+              <option value="alpha">Alpha Miner</option>
+              <option value="heuristics">Heuristics Miner</option>
+            </select>
+            <p class="modal-hint">Select the discovery algorithm to use</p>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="modal-btn modal-btn-cancel" id="modal-cancel-btn">
+            Cancel
+          </button>
+          <button class="modal-btn modal-btn-primary" id="modal-start-btn">
+            Start
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="{% static 'js/dashboard.js' %}"></script>
+  </body>
+</html>
