@@ -13,7 +13,7 @@ from .serializers import (
 )
 from .services import (
     smart_clean_event_log,
-    get_event_log_table_data,
+    #get_event_log_table_data,
 )
 
 
