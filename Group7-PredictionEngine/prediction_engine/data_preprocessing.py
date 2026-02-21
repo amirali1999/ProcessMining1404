@@ -3,7 +3,8 @@ Data Preprocessing Module for Process Mining Prediction
 Handles XES file reading, cleaning, and feature extraction
 """
 
-import pm4py
+import torch
+from torch.utils.data import IterableDataset, DataLoader
 import pandas as pd
 import numpy as np
 import pickle
@@ -11,7 +12,6 @@ import os
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 import joblib
-
 
 class XESDataPreprocessor:
     """
@@ -36,12 +36,14 @@ class XESDataPreprocessor:
         
     def load_xes(self):
         """Load XES file using pm4py"""
+        import pm4py
         print(f"Loading XES file from {self.xes_file_path}...")
         self.log = pm4py.read_xes(self.xes_file_path)
         print(f"Loaded {len(self.log)} cases")
         
     def convert_to_dataframe(self):
         """Convert event log to pandas DataFrame"""
+        import pm4py
         print("Converting log to DataFrame...")
         self.df = pm4py.convert_to_dataframe(self.log)
         print(f"DataFrame shape: {self.df.shape}")
@@ -374,6 +376,85 @@ class XESDataPreprocessor:
             'activity_counts': activity_dist  # For class weighting
         }
     
+    def _sequence_generator_for_lstm(self, max_case_length=50, activity_to_id=None, time_mode="raw"):
+        """
+        Yields:
+        x_seq: (max_case_length,) int32
+        y_next: () int32
+        y_time: () float32
+        """
+        for case_id, case_data in self.df.groupby('case:concept:name'):
+            case_data = case_data.sort_values('time:timestamp')
+            activities = case_data['concept:name'].tolist()
+            timestamps = case_data['time:timestamp'].tolist()
+
+            if len(activities) < 2:
+                continue
+
+            total_duration = (timestamps[-1] - timestamps[0]).total_seconds()
+
+            for i in range(1, len(activities)):
+                seq = activities[:i]
+
+                # pad / truncate
+                if len(seq) < max_case_length:
+                    seq = ['START'] * (max_case_length - len(seq)) + seq
+                else:
+                    seq = seq[-max_case_length:]
+
+                next_act = activities[i]
+
+                elapsed = (timestamps[i] - timestamps[0]).total_seconds()
+                remaining = total_duration - elapsed
+
+                # encode fast
+                x = [activity_to_id.get(a, activity_to_id['END']) for a in seq]
+                y_next = activity_to_id.get(next_act, activity_to_id['END'])
+
+                if time_mode == "log1p":
+                    y_time = np.float32(np.log1p(max(remaining, 0.0)))
+                else:
+                    y_time = np.float32(remaining)
+
+                yield (np.array(x, dtype=np.int32), np.int32(y_next), y_time)
+
+
+    # def build_tf_dataset_for_lstm(self, max_case_length=50, batch_size=256, shuffle_buffer=20000, time_mode="log1p"):
+
+    #     # build vocabulary
+    #     all_activities = list(self.df['concept:name'].unique()) + ['START', 'END']
+    #     self.activity_encoder.fit(all_activities)
+
+    #     # fast lookup map
+    #     activity_to_id = {act: int(idx) for idx, act in enumerate(self.activity_encoder.classes_)}
+    #     vocab_size = len(activity_to_id)
+
+    #     output_signature = (
+    #         tf.TensorSpec(shape=(max_case_length,), dtype=tf.int32),
+    #         tf.TensorSpec(shape=(), dtype=tf.int32),
+    #         tf.TensorSpec(shape=(), dtype=tf.float32),
+    #     )
+
+    #     ds = tf.data.Dataset.from_generator(
+    #         lambda: self._sequence_generator_for_lstm(
+    #             max_case_length=max_case_length,
+    #             activity_to_id=activity_to_id,
+    #             time_mode=time_mode
+    #         ),
+    #         output_signature=output_signature
+    #     )
+
+    #     ds = ds.shuffle(shuffle_buffer, reshuffle_each_iteration=True)
+    #     ds = ds.batch(batch_size).prefetch(tf.data.AUTOTUNE)
+
+    #     return {
+    #         "dataset": ds,
+    #         "vocab_size": vocab_size,
+    #         "max_length": max_case_length,
+    #         "time_mode": time_mode
+    #     }
+
+    
     def save_preprocessor(self, filepath: str):
         """Save preprocessor state"""
         state = {
@@ -404,3 +485,72 @@ class XESDataPreprocessor:
         if os.path.exists(scaler_path):
             self.time_scaler = joblib.load(scaler_path)
             print(f"Time scaler loaded from {scaler_path}")
+    
+    def build_torch_dataloader_for_lstm(self, max_case_length=50, batch_size=256, time_mode="log1p", num_workers=0):
+        all_acts = list(self.df['concept:name'].unique()) + ['START', 'END']
+        self.activity_encoder.fit(all_acts)
+
+        activity_to_id = {act: int(i) for i, act in enumerate(self.activity_encoder.classes_)}
+        vocab_size = len(activity_to_id)
+
+        ds = _LSTMItrDataset(self.df, activity_to_id, max_len=max_case_length, time_mode=time_mode)
+
+        loader = DataLoader(
+            ds,
+            batch_size=batch_size,
+            num_workers=num_workers,   # روی ویندوز معمولاً 0 پایدارتره
+            pin_memory=True
+        )
+
+        return {
+            "loader": loader,
+            "vocab_size": vocab_size,
+            "max_length": max_case_length,
+            "pad_id": activity_to_id.get("START", 0),
+            "time_mode": time_mode
+        }
+
+
+
+class _LSTMItrDataset(IterableDataset):
+    def __init__(self, df, activity_to_id, max_len=50, time_mode="log1p"):
+        super().__init__()
+        self.df = df
+        self.activity_to_id = activity_to_id
+        self.max_len = max_len
+        self.time_mode = time_mode
+
+    def __iter__(self):
+        for _, case_data in self.df.groupby('case:concept:name'):
+            case_data = case_data.sort_values('time:timestamp')
+            acts = case_data['concept:name'].tolist()
+            ts = case_data['time:timestamp'].tolist()
+            if len(acts) < 2:
+                continue
+
+            total = (ts[-1] - ts[0]).total_seconds()
+
+            for i in range(1, len(acts)):
+                seq = acts[:i]
+                if len(seq) < self.max_len:
+                    seq = ['START'] * (self.max_len - len(seq)) + seq
+                else:
+                    seq = seq[-self.max_len:]
+
+                next_act = acts[i]
+                elapsed = (ts[i] - ts[0]).total_seconds()
+                rem = max(total - elapsed, 0.0)
+
+                x = [self.activity_to_id.get(a, self.activity_to_id['END']) for a in seq]
+                y_next = self.activity_to_id.get(next_act, self.activity_to_id['END'])
+
+                if self.time_mode == "log1p":
+                    y_time = float(np.log1p(rem))
+                else:
+                    y_time = float(rem)
+
+                yield (
+                    torch.tensor(x, dtype=torch.long),
+                    torch.tensor(y_next, dtype=torch.long),
+                    torch.tensor(y_time, dtype=torch.float32),
+                )

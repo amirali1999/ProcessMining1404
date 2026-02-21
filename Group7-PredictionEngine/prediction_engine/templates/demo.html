@@ -3,106 +3,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Process Mining Prediction Demo</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Process Mining Prediction Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { padding-top: 20px; background-color: #f8f9fa; }
-        .card { margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .prediction-result { display: none; }
-        .loading { display: none; }
+        :root {
+            --primary: #10b981;
+            --primary-600: #059669;
+            --primary-darker: #047857;
+            --bg: #0f172a;
+            --bg-panel: #111827;
+            --bg-card: #1e293b;
+            --text: #e5e7eb;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #1f2937;
+            --success: #28a745;
+            --danger: #ef4444;
+            --warning: #fbbf24;
+            --info: #3b82f6;
+            --font-fa: "Vazirmatn";
+            --font-en: "Inter";
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: var(--font-en), var(--font-fa), sans-serif;
+            color: var(--text);
+            background: radial-gradient(#1e293b 0%, #0b1220 70%, #070b14 100%);
+            min-height: 100vh;
+        }
+
+        .shell {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 20px 48px;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: 0.3px;
+        }
+
+        .hero p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.45);
+        }
+
+        .panel h2 {
+            margin: 0 0 12px;
+            font-size: 18px;
+        }
+
+        .section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 14px;
+        }
+
+        .section:last-child { margin-bottom: 0; }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        input[type="file"] {
+            width: 100%;
+            background: #0b1324;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        textarea { resize: vertical; }
+
+        .row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover { background: var(--primary-600); }
+        .btn-primary:active { background: var(--primary-darker); transform: scale(0.98); }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            border: 1px solid var(--border);
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #0b1324;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .chip:hover { color: var(--text); border-color: var(--primary-600); }
+
+        .status {
+            display: none;
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin-top: 12px;
+            font-size: 13px;
+        }
+
+        .status.success { background: rgba(16, 185, 129, 0.15); color: var(--primary); }
+        .status.error { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+
+        .result-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .result-card {
+            border-radius: 12px;
+            padding: 14px;
+            border: 1px solid var(--border);
+            background: #0b1324;
+        }
+
+        .result-card h3 { margin: 0 0 8px; font-size: 14px; color: var(--text-secondary); }
+        .result-value { font-size: 20px; font-weight: 700; }
+
+        .loading {
+            display: none;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .footer-hint {
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header class="pb-3 mb-4 border-bottom">
-            <a href="/" class="d-flex align-items-center text-dark text-decoration-none">
-                <span class="fs-4">Process Mining Prediction Engine</span>
-            </a>
-        </header>
+    <div class="shell">
+        <div class="hero">
+            <h1>Process Mining Prediction Engine</h1>
+            <p>Upload a XES log, train Torch + classic models, and run live predictions on active cases.</p>
+        </div>
 
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Input Case Data</h5>
+        <div class="grid">
+            <div class="panel">
+                <h2>Train Models (XES)</h2>
+                <form id="trainingForm" class="section">
+                    <label for="xesFile">XES File</label>
+                    <input type="file" id="xesFile" name="xes_file" accept=".xes,.xes.gz" required>
+
+                    <div class="row" style="margin-top: 12px;">
+                        <label>
+                            <input type="checkbox" id="trainOutcome" checked>
+                            Train classic outcome models
+                        </label>
+                        <label>
+                            <input type="checkbox" id="trainLstm" checked>
+                            Train Torch LSTM models
+                        </label>
                     </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Test Cases:</label>
-                            <div class="d-flex gap-2 flex-wrap">
-                                <button class="btn btn-sm btn-outline-primary test-case-btn" data-seq="NEW, CODE OK, MANUAL" title="Happy Path">Happy Path</button>
-                                <button class="btn btn-sm btn-outline-primary test-case-btn" data-seq="NEW" title="Short Sequence">Short</button>
-                                <button class="btn btn-sm btn-outline-primary test-case-btn" data-seq="NEW, SUPER_WEIRD_ACTIVITY, MANUAL" title="Unknown Activity">Unknown Act</button>
-                                <button class="btn btn-sm btn-outline-primary test-case-btn" data-seq="" title="Empty Sequence">Empty</button>
-                                <button class="btn btn-sm btn-outline-primary test-case-btn" data-seq="NEW, CODE OK, MANUAL, BILLED, STORNO, REJECTED, NEW, CODE OK" title="Long Sequence">Long</button>
-                            </div>
+
+                    <div class="row" style="margin-top: 12px;">
+                        <div>
+                            <label for="maxCaseLength">Max case length</label>
+                            <input type="number" id="maxCaseLength" value="50" min="5" max="200">
                         </div>
-                        <hr>
-                        <form id="predictionForm">
-                            <div class="mb-3">
-                                <label for="caseId" class="form-label">Case ID (Optional - for lookup)</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="caseId" placeholder="e.g. A">
-                                    <button class="btn btn-outline-secondary" type="button" id="lookupBtn">Lookup</button>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="activities" class="form-label">Activity Sequence (comma separated)</label>
-                                <textarea class="form-control" id="activities" rows="3" placeholder="NEW, CHANGE DIAGN, ..."></textarea>
-                                <div class="form-text">Enter the sequence of activities that have occurred so far.</div>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary w-100">Predict Next Steps</button>
-                        </form>
+                        <div>
+                            <label for="batchSize">Batch size</label>
+                            <input type="number" id="batchSize" value="512" min="32" max="2048">
+                        </div>
                     </div>
-                </div>
+
+                    <div class="row" style="margin-top: 12px;">
+                        <div>
+                            <label for="epochsNext">Epochs (next activity)</label>
+                            <input type="number" id="epochsNext" value="5" min="1" max="100">
+                        </div>
+                        <div>
+                            <label for="epochsTime">Epochs (remaining time)</label>
+                            <input type="number" id="epochsTime" value="5" min="1" max="100">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="margin-top: 14px; width: 100%;">
+                        Train Models
+                    </button>
+                    <div id="trainStatus" class="status"></div>
+                </form>
+
+                <div class="footer-hint">Training runs on the server and updates the in-memory models.</div>
             </div>
 
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">Results</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="text-center loading" id="loadingSpinner">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <p class="mt-2">Running AI Models...</p>
-                        </div>
-
-                        <div id="resultsArea" class="prediction-result">
-                            <!-- Suggestion Section -->
-                            <div class="p-3 mb-3 suggestion-box rounded" style="border-left: 5px solid #0d6efd; background-color: #e7f1ff;">
-                                <h5 class="text-primary">Suggestion (Next Best Action)</h5>
-                                <h3 id="nextActivity" class="fw-bold"></h3>
-                                <small class="text-muted">Based on historical patterns</small>
-                            </div>
-
-                            <!-- Prediction Section -->
-                            <div class="p-3 prediction-box rounded" style="border-left: 5px solid #198754; background-color: #d1e7dd;">
-                                <h5 class="text-success">Predictions (Future Outcome)</h5>
-                                
-                                <div class="row mt-3">
-                                    <div class="col-6">
-                                        <h6>Remaining Time</h6>
-                                        <p class="fs-5" id="remainingTime">-</p>
-                                        <small class="text-muted" id="completionDate"></small>
-                                    </div>
-                                    <div class="col-6">
-                                        <h6>Final Outcome</h6>
-                                        <p class="fs-5" id="outcome">-</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div id="emptyState" class="text-center text-muted py-5">
-                            <p>Enter case data and click Predict to see results.</p>
-                        </div>
+            <div class="panel">
+                <h2>Predict Live Case</h2>
+                <div class="section">
+                    <div class="chip-row">
+                        <button type="button" class="chip test-case-btn" data-seq="NEW, CODE OK, MANUAL">Happy Path</button>
+                        <button type="button" class="chip test-case-btn" data-seq="NEW">Short</button>
+                        <button type="button" class="chip test-case-btn" data-seq="NEW, SUPER_WEIRD_ACTIVITY, MANUAL">Unknown Act</button>
+                        <button type="button" class="chip test-case-btn" data-seq="">Empty</button>
+                        <button type="button" class="chip test-case-btn" data-seq="NEW, CODE OK, MANUAL, BILLED, STORNO, REJECTED, NEW, CODE OK">Long</button>
                     </div>
                 </div>
+
+                <form id="predictionForm" class="section">
+                    <label for="caseId">Case ID (optional)</label>
+                    <input type="text" id="caseId" placeholder="e.g. A">
+
+                    <label for="activities" style="margin-top: 12px;">Activity sequence (comma separated)</label>
+                    <textarea id="activities" rows="3" placeholder="NEW, CHANGE DIAGN, ..."></textarea>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 14px; width: 100%;">
+                        Predict Next Steps
+                    </button>
+                </form>
+            </div>
+
+            <div class="panel">
+                <h2>Results</h2>
+                <div class="loading" id="loadingSpinner">Running models...</div>
+
+                <div id="resultsArea" class="result-grid" style="display: none;">
+                    <div class="result-card">
+                        <h3>Next Activity</h3>
+                        <div class="result-value" id="nextActivity">-</div>
+                    </div>
+                    <div class="result-card">
+                        <h3>Remaining Time</h3>
+                        <div class="result-value" id="remainingTime">-</div>
+                        <div class="footer-hint" id="completionDate"></div>
+                    </div>
+                    <div class="result-card">
+                        <h3>Final Outcome</h3>
+                        <div class="result-value" id="outcome">-</div>
+                    </div>
+                </div>
+
+                <div id="emptyState" class="footer-hint">Enter case data and click Predict to see results.</div>
             </div>
         </div>
     </div>
@@ -114,6 +314,52 @@
                 document.getElementById('activities').value = btn.dataset.seq;
                 document.getElementById('caseId').value = '';
             });
+        });
+
+        const trainStatus = document.getElementById('trainStatus');
+
+        document.getElementById('trainingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fileInput = document.getElementById('xesFile');
+            if (!fileInput.files.length) {
+                trainStatus.textContent = 'Please select a XES file.';
+                trainStatus.className = 'status error';
+                trainStatus.style.display = 'block';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('xes_file', fileInput.files[0]);
+            formData.append('train_outcome', document.getElementById('trainOutcome').checked);
+            formData.append('train_lstm', document.getElementById('trainLstm').checked);
+            formData.append('max_case_length', document.getElementById('maxCaseLength').value);
+            formData.append('batch_size', document.getElementById('batchSize').value);
+            formData.append('epochs_next', document.getElementById('epochsNext').value);
+            formData.append('epochs_time', document.getElementById('epochsTime').value);
+
+            trainStatus.textContent = 'Training started. This can take a few minutes...';
+            trainStatus.className = 'status';
+            trainStatus.style.display = 'block';
+
+            try {
+                const response = await fetch('/prediction/api/train/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    trainStatus.textContent = 'Training completed. Models are ready for prediction.';
+                    trainStatus.className = 'status success';
+                } else {
+                    trainStatus.textContent = data.error || 'Training failed.';
+                    trainStatus.className = 'status error';
+                }
+            } catch (error) {
+                trainStatus.textContent = 'Training request failed.';
+                trainStatus.className = 'status error';
+            }
         });
 
         document.getElementById('predictionForm').addEventListener('submit', async (e) => {
@@ -180,7 +426,7 @@
                         }
                     }
 
-                    document.getElementById('resultsArea').style.display = 'block';
+                        document.getElementById('resultsArea').style.display = 'grid';
                 } else {
                     alert('Error: ' + (data.error || 'Unknown error'));
                     document.getElementById('emptyState').style.display = 'block';

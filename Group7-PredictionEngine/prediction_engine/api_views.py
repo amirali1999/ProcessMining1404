@@ -7,45 +7,95 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.core.files.storage import FileSystemStorage
+from django.utils.timezone import now
 import json
 import numpy as np
 import pandas as pd
-import pm4py
 import os
 import pickle
 
 # Import our models
 from .outcome_prediction import OutcomePredictionModel, EnsembleOutcomePredictor
-from .lstm_models import CombinedLSTMPredictor
+from .torch_models import TorchCombinedPredictor
+try:
+    from .lstm_models import CombinedLSTMPredictor
+except Exception:  # Optional dependency
+    CombinedLSTMPredictor = None
 from .data_preprocessing import XESDataPreprocessor
 
 # Global variables for loaded models
 # Check both project root and local app directory for trained_models
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LOCAL_MODELS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'trained_models')
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+LOCAL_MODELS_DIR = os.path.join(APP_DIR, 'trained_models')
 ROOT_MODELS_DIR = os.path.join(BASE_DIR, 'trained_models')
+LOCAL_TORCH_MODELS_DIR = os.path.join(APP_DIR, 'trained_models_torch')
+ROOT_TORCH_MODELS_DIR = os.path.join(BASE_DIR, 'trained_models_torch')
+UPLOAD_DIR = os.path.join(BASE_DIR, 'uploaded_xes')
 
 outcome_model = None
 lstm_predictor = None
 preprocessor = None
 event_log_df = None
+sequence_backend = None
+current_xes_path = None
 
 
 def demo_page(request):
     """Serve the demo page"""
     return render(request, 'demo.html')
 
+
+def _resolve_default_xes_path():
+    env_path = os.environ.get('XES_PATH')
+    if env_path and os.path.exists(env_path):
+        return env_path
+
+    dataset_dir = os.path.join(BASE_DIR, 'dataset')
+    if os.path.isdir(dataset_dir):
+        for name in os.listdir(dataset_dir):
+            if name.endswith('.xes') or name.endswith('.xes.gz'):
+                return os.path.join(dataset_dir, name)
+
+    return None
+
+
+def _load_event_log(xes_path: str):
+    import pm4py
+    global event_log_df
+    if not xes_path or not os.path.exists(xes_path):
+        event_log_df = None
+        return
+
+    log = pm4py.read_xes(xes_path)
+    event_log_df = pm4py.convert_to_dataframe(log)
+
+
+def _get_pad_id():
+    if preprocessor is None or not hasattr(preprocessor, 'activity_encoder'):
+        return 0
+    try:
+        if 'START' in preprocessor.activity_encoder.classes_:
+            return int(np.where(preprocessor.activity_encoder.classes_ == 'START')[0][0])
+    except Exception:
+        return 0
+    return 0
+
 def load_models():
     """Load all trained models"""
-    global outcome_model, lstm_predictor, preprocessor, event_log_df
+    global outcome_model, lstm_predictor, preprocessor, event_log_df, sequence_backend, current_xes_path
     
     print("Loading models...")
     
     # 1. Load preprocessor
     # Check root first (most likely location for shared preprocessor), then local
-    preprocessor_path = os.path.join(ROOT_MODELS_DIR, 'preprocessor.pkl')
-    if not os.path.exists(preprocessor_path):
-        preprocessor_path = os.path.join(LOCAL_MODELS_DIR, 'preprocessor.pkl')
+    preprocessor_path = None
+    for base_dir in [LOCAL_TORCH_MODELS_DIR, ROOT_TORCH_MODELS_DIR, ROOT_MODELS_DIR, LOCAL_MODELS_DIR]:
+        candidate = os.path.join(base_dir, 'preprocessor.pkl')
+        if os.path.exists(candidate):
+            preprocessor_path = candidate
+            break
         
     if os.path.exists(preprocessor_path):
         preprocessor = XESDataPreprocessor('')
@@ -62,9 +112,12 @@ def load_models():
     
     # 2. Load outcome model (Ensemble)
     # Check local first (app specific), then root
-    outcome_model_path = os.path.join(LOCAL_MODELS_DIR, 'ensemble')
-    if not os.path.exists(outcome_model_path):
-        outcome_model_path = os.path.join(ROOT_MODELS_DIR, 'ensemble')
+    outcome_model_path = None
+    for base_dir in [LOCAL_TORCH_MODELS_DIR, ROOT_TORCH_MODELS_DIR, LOCAL_MODELS_DIR, ROOT_MODELS_DIR]:
+        candidate = os.path.join(base_dir, 'ensemble')
+        if os.path.exists(candidate):
+            outcome_model_path = candidate
+            break
         
     if os.path.exists(outcome_model_path):
         outcome_model = EnsembleOutcomePredictor()
@@ -75,51 +128,74 @@ def load_models():
     
     # 3. Load LSTM models
     # Check root first (seems to be where they are), then local
-    lstm_model_path = os.path.join(ROOT_MODELS_DIR, 'lstm')
-    if not os.path.exists(lstm_model_path) or not os.listdir(lstm_model_path):
-        lstm_model_path = os.path.join(LOCAL_MODELS_DIR, 'lstm')
-        
-    if os.path.exists(lstm_model_path):
-        # Get vocab size and max length from metadata
-        # Try new naming convention first
-        metadata_path = os.path.join(lstm_model_path, 'best_next_activity_model.keras_metadata.pkl')
-        if not os.path.exists(metadata_path):
-            # Fallback to old naming
-            metadata_path = os.path.join(lstm_model_path, 'next_activity_lstm_metadata.pkl')
-            
-        if os.path.exists(metadata_path):
-            with open(metadata_path, 'rb') as f:
-                metadata = pickle.load(f)
-            
-            lstm_predictor = CombinedLSTMPredictor(
-                vocab_size=metadata['vocab_size'],
-                max_length=metadata['max_length']
-            )
-            lstm_predictor.load(lstm_model_path)
-            print(f"LSTM models loaded from {lstm_model_path}")
-        elif preprocessor is not None:
-            # Fallback: Infer from preprocessor
-            print("Metadata not found, inferring from preprocessor...")
+    sequence_backend = None
+    torch_dir = None
+    for base_dir in [LOCAL_TORCH_MODELS_DIR, ROOT_TORCH_MODELS_DIR]:
+        candidate = os.path.join(base_dir, 'lstm_torch')
+        if os.path.exists(candidate):
+            torch_dir = candidate
+            break
+
+    if torch_dir and preprocessor is not None:
+        try:
             vocab_size = len(preprocessor.activity_encoder.classes_)
-            lstm_predictor = CombinedLSTMPredictor(
-                vocab_size=vocab_size,
-                max_length=50  # Default
-            )
-            lstm_predictor.load(lstm_model_path)
-            print(f"LSTM models loaded (inferred metadata) from {lstm_model_path}")
-    else:
-        print("Warning: LSTM models not found")
+            pad_id = _get_pad_id()
+            lstm_predictor = TorchCombinedPredictor(vocab_size=vocab_size, pad_id=pad_id)
+            lstm_predictor.load(torch_dir)
+            sequence_backend = 'torch'
+            print(f"Torch LSTM models loaded from {torch_dir}")
+        except Exception as e:
+            print(f"Warning: Torch models could not be loaded: {e}")
+            lstm_predictor = None
+
+    if lstm_predictor is None:
+        lstm_model_path = os.path.join(ROOT_MODELS_DIR, 'lstm')
+        if not os.path.exists(lstm_model_path) or not os.listdir(lstm_model_path):
+            lstm_model_path = os.path.join(LOCAL_MODELS_DIR, 'lstm')
+
+        if os.path.exists(lstm_model_path) and CombinedLSTMPredictor is not None:
+            metadata_path = os.path.join(lstm_model_path, 'best_next_activity_model.keras_metadata.pkl')
+            if not os.path.exists(metadata_path):
+                metadata_path = os.path.join(lstm_model_path, 'next_activity_lstm_metadata.pkl')
+
+            if os.path.exists(metadata_path):
+                with open(metadata_path, 'rb') as f:
+                    metadata = pickle.load(f)
+
+                lstm_predictor = CombinedLSTMPredictor(
+                    vocab_size=metadata['vocab_size'],
+                    max_length=metadata['max_length']
+                )
+                lstm_predictor.load(lstm_model_path)
+                sequence_backend = 'tf'
+                print(f"LSTM models loaded from {lstm_model_path}")
+            elif preprocessor is not None:
+                print("Metadata not found, inferring from preprocessor...")
+                vocab_size = len(preprocessor.activity_encoder.classes_)
+                lstm_predictor = CombinedLSTMPredictor(
+                    vocab_size=vocab_size,
+                    max_length=50
+                )
+                lstm_predictor.load(lstm_model_path)
+                sequence_backend = 'tf'
+                print(f"LSTM models loaded (inferred metadata) from {lstm_model_path}")
+        else:
+            print("Warning: LSTM models not found")
     
     # 4. Load event log for case lookup
     # Use BASE_DIR to find the event log folder
-    xes_file = os.path.join(BASE_DIR, 'HospitalBilling-EventLog_1_all', 
-                            'HospitalBilling-EventLog.xes')
-    if os.path.exists(xes_file):
-        log = pm4py.read_xes(xes_file)
-        event_log_df = pm4py.convert_to_dataframe(log)
-        print(f"Event log loaded: {len(event_log_df)} events")
+    if current_xes_path and os.path.exists(current_xes_path):
+        _load_event_log(current_xes_path)
+        if event_log_df is not None:
+            print(f"Event log loaded: {len(event_log_df)} events")
     else:
-        print(f"Warning: Event log not found at {xes_file}")
+        xes_file = _resolve_default_xes_path()
+        if xes_file:
+            _load_event_log(xes_file)
+            if event_log_df is not None:
+                print(f"Event log loaded: {len(event_log_df)} events")
+        else:
+            print("Warning: Event log not found")
     
     print("All models loaded successfully")
 
@@ -271,20 +347,22 @@ def prepare_sequence(activities, max_length=50):
     if preprocessor is None:
         raise ValueError("Preprocessor not loaded")
     
+    pad_id = _get_pad_id()
+
     # Encode activities
     encoded_activities = []
     for act in activities:
         try:
             encoded = preprocessor.activity_encoder.transform([act])[0]
         except ValueError:
-            # Unknown activity - use 0
-            encoded = 0
+            # Unknown activity - use pad_id
+            encoded = pad_id
         encoded_activities.append(encoded)
     
     # Pad or truncate
     if len(encoded_activities) < max_length:
-        # Pad with 0 (assuming 0 is padding)
-        encoded_activities = [0] * (max_length - len(encoded_activities)) + encoded_activities
+        # Pad with pad_id
+        encoded_activities = [pad_id] * (max_length - len(encoded_activities)) + encoded_activities
     else:
         encoded_activities = encoded_activities[-max_length:]
     
@@ -307,6 +385,9 @@ def predict_outcome(request):
         if not case_id:
             return JsonResponse({'error': 'case_id is required'}, status=400)
         
+        if preprocessor is None:
+            return JsonResponse({'error': 'Preprocessor not loaded'}, status=500)
+
         # Get case data
         case_data = get_case_data(case_id)
         if case_data is None:
@@ -356,6 +437,9 @@ def predict_next_activity(request):
         if not case_id:
             return JsonResponse({'error': 'case_id is required'}, status=400)
         
+        if preprocessor is None:
+            return JsonResponse({'error': 'Preprocessor not loaded'}, status=500)
+
         # Get case data
         case_data = get_case_data(case_id)
         if case_data is None:
@@ -368,14 +452,22 @@ def predict_next_activity(request):
         if lstm_predictor is None:
             return JsonResponse({'error': 'LSTM model not loaded'}, status=500)
         
-        next_activity_encoded = lstm_predictor.next_activity_model.predict(sequence)[0]
-        next_activity = preprocessor.activity_encoder.inverse_transform([next_activity_encoded])[0]
-        
-        # Get top-k predictions
-        proba = lstm_predictor.next_activity_model.predict(sequence, return_proba=True)[0]
-        top_k_indices = np.argsort(proba)[-5:][::-1]
-        top_k_activities = preprocessor.activity_encoder.inverse_transform(top_k_indices)
-        top_k_proba = proba[top_k_indices]
+        if sequence_backend == 'torch':
+            next_activity_encoded = lstm_predictor.predict_next(sequence)[0]
+            next_activity = preprocessor.activity_encoder.inverse_transform([next_activity_encoded])[0]
+
+            proba = lstm_predictor.predict_next(sequence, return_proba=True)[0]
+            top_k_indices = np.argsort(proba)[-5:][::-1]
+            top_k_activities = preprocessor.activity_encoder.inverse_transform(top_k_indices)
+            top_k_proba = proba[top_k_indices]
+        else:
+            next_activity_encoded = lstm_predictor.next_activity_model.predict(sequence)[0]
+            next_activity = preprocessor.activity_encoder.inverse_transform([next_activity_encoded])[0]
+
+            proba = lstm_predictor.next_activity_model.predict(sequence, return_proba=True)[0]
+            top_k_indices = np.argsort(proba)[-5:][::-1]
+            top_k_activities = preprocessor.activity_encoder.inverse_transform(top_k_indices)
+            top_k_proba = proba[top_k_indices]
         
         response = {
             'case_id': case_id,
@@ -409,6 +501,9 @@ def predict_remaining_time(request):
         if not case_id:
             return JsonResponse({'error': 'case_id is required'}, status=400)
         
+        if preprocessor is None:
+            return JsonResponse({'error': 'Preprocessor not loaded'}, status=500)
+
         # Get case data
         case_data = get_case_data(case_id)
         if case_data is None:
@@ -421,18 +516,25 @@ def predict_remaining_time(request):
         if lstm_predictor is None:
             return JsonResponse({'error': 'LSTM model not loaded'}, status=500)
         
-        remaining_time_norm = lstm_predictor.remaining_time_model.predict(sequence)[0]
+        if sequence_backend == 'torch':
+            remaining_time_norm = lstm_predictor.predict_remaining_time(sequence)[0]
+        else:
+            remaining_time_norm = lstm_predictor.remaining_time_model.predict(sequence)[0]
         
         # Denormalize time
         if hasattr(preprocessor, 'time_scaler'):
-            log_time = preprocessor.time_scaler.inverse_transform([[remaining_time_norm]])[0][0]
+            if isinstance(remaining_time_norm, (list, np.ndarray)):
+                val = remaining_time_norm[0] if len(remaining_time_norm) > 0 else 0
+            else:
+                val = remaining_time_norm
+            log_time = preprocessor.time_scaler.inverse_transform([[val]])[0][0]
             remaining_time_seconds = np.expm1(log_time)
         else:
             remaining_time_seconds = remaining_time_norm
         
         # Calculate elapsed time
-        timestamps = case_data['time:timestamp'].tolist()
-        elapsed_time = (timestamps[-1] - timestamps[0]).total_seconds()
+        timestamps = case_data.get('timestamps', [])
+        elapsed_time = (timestamps[-1] - timestamps[0]).total_seconds() if timestamps else 0
         
         response = {
             'case_id': case_id,
@@ -441,7 +543,7 @@ def predict_remaining_time(request):
             'predicted_remaining_time_hours': float(remaining_time_seconds / 3600),
             'predicted_remaining_time_days': float(remaining_time_seconds / 86400),
             'elapsed_time_seconds': elapsed_time,
-            'current_activities': case_data['concept:name'].tolist()
+            'current_activities': case_data['activities']
         }
         
         return JsonResponse(response)
@@ -483,6 +585,9 @@ def predict_all(request):
                 'attributes': {}  # Dummy
             }
         
+        if preprocessor is None:
+            return JsonResponse({'error': 'Preprocessor not loaded'}, status=500)
+
         # Prepare features for outcome
         # Note: This might be less accurate without timestamps/attributes
         try:
@@ -562,12 +667,18 @@ def predict_all(request):
         # Next activity prediction
         if lstm_predictor is not None:
             try:
-                next_activity_encoded = lstm_predictor.next_activity_model.predict(sequence)[0]
-                next_activity = preprocessor.activity_encoder.inverse_transform([next_activity_encoded])[0]
-                response['suggestion']['next_activity'] = next_activity
-                
-                # Remaining time prediction
-                remaining_time_norm = lstm_predictor.remaining_time_model.predict(sequence)[0]
+                if sequence_backend == 'torch':
+                    next_activity_encoded = lstm_predictor.predict_next(sequence)[0]
+                    next_activity = preprocessor.activity_encoder.inverse_transform([next_activity_encoded])[0]
+                    response['suggestion']['next_activity'] = next_activity
+
+                    remaining_time_norm = lstm_predictor.predict_remaining_time(sequence)[0]
+                else:
+                    next_activity_encoded = lstm_predictor.next_activity_model.predict(sequence)[0]
+                    next_activity = preprocessor.activity_encoder.inverse_transform([next_activity_encoded])[0]
+                    response['suggestion']['next_activity'] = next_activity
+
+                    remaining_time_norm = lstm_predictor.remaining_time_model.predict(sequence)[0]
                 
                 # Denormalize time
                 if hasattr(preprocessor, 'time_scaler'):
@@ -603,6 +714,7 @@ def health_check(request):
     """Health check endpoint"""
     return JsonResponse({
         'status': 'healthy',
+        'sequence_backend': sequence_backend,
         'models_loaded': {
             'outcome_model': outcome_model is not None,
             'lstm_predictor': lstm_predictor is not None,
@@ -610,6 +722,112 @@ def health_check(request):
             'event_log': event_log_df is not None
         }
     })
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def upload_and_train(request):
+    """
+    Upload XES and train models.
+
+    POST /api/train/
+    Form-Data:
+      - xes_file: file
+      - train_outcome: true/false
+      - train_lstm: true/false
+      - max_case_length: int (optional)
+      - batch_size: int (optional)
+      - epochs_next: int (optional)
+      - epochs_time: int (optional)
+    """
+    global outcome_model, lstm_predictor, preprocessor, current_xes_path, sequence_backend
+
+    if 'xes_file' not in request.FILES:
+        return JsonResponse({'error': 'xes_file is required'}, status=400)
+
+    train_outcome = str(request.POST.get('train_outcome', 'true')).lower() in ['true', '1', 'yes', 'on']
+    train_lstm = str(request.POST.get('train_lstm', 'true')).lower() in ['true', '1', 'yes', 'on']
+    if not train_outcome and not train_lstm:
+        return JsonResponse({'error': 'At least one of train_outcome or train_lstm must be true'}, status=400)
+
+    max_case_length = int(request.POST.get('max_case_length', 50))
+    batch_size = int(request.POST.get('batch_size', 512))
+    epochs_next = int(request.POST.get('epochs_next', 5))
+    epochs_time = int(request.POST.get('epochs_time', 5))
+
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    storage = FileSystemStorage(location=UPLOAD_DIR)
+    xes_file = request.FILES['xes_file']
+    timestamp = now().strftime('%Y%m%d_%H%M%S')
+    filename = storage.save(f"{timestamp}_{xes_file.name}", xes_file)
+    file_path = storage.path(filename)
+
+    current_xes_path = file_path
+
+    output_dir = LOCAL_TORCH_MODELS_DIR
+    os.makedirs(output_dir, exist_ok=True)
+
+    try:
+        preprocessor = XESDataPreprocessor(file_path)
+        preprocessor.load_xes()
+        preprocessor.convert_to_dataframe()
+        preprocessor.clean_data()
+
+        if train_outcome:
+            X_train, X_test, y_train, y_test, feature_columns = preprocessor.prepare_outcome_prediction_data()
+            ensemble = EnsembleOutcomePredictor()
+            ensemble.train(X_train, y_train, feature_columns)
+            ensemble.evaluate(X_test, y_test, preprocessor.outcome_encoder)
+            ensemble_dir = os.path.join(output_dir, 'ensemble')
+            ensemble.save(ensemble_dir)
+            outcome_model = ensemble
+
+        if train_lstm:
+            lstm_data = preprocessor.build_torch_dataloader_for_lstm(
+                max_case_length=max_case_length,
+                batch_size=batch_size,
+                time_mode="log1p",
+                num_workers=0
+            )
+            predictor = TorchCombinedPredictor(
+                vocab_size=lstm_data['vocab_size'],
+                pad_id=lstm_data['pad_id']
+            )
+            predictor.train_next(lstm_data['loader'], epochs=epochs_next, lr=1e-3)
+            predictor.train_time(lstm_data['loader'], epochs=epochs_time, lr=1e-3)
+            lstm_dir = os.path.join(output_dir, 'lstm_torch')
+            predictor.save(lstm_dir)
+            lstm_predictor = predictor
+            sequence_backend = 'torch'
+
+        preprocessor_path = os.path.join(output_dir, 'preprocessor.pkl')
+        preprocessor.save_preprocessor(preprocessor_path)
+
+        info_path = os.path.join(output_dir, 'training_info.txt')
+        with open(info_path, 'w') as f:
+            f.write(f"Training completed at: {now()}\n")
+            f.write(f"XES file: {file_path}\n")
+            f.write(f"Number of cases: {preprocessor.df['case:concept:name'].nunique()}\n")
+            f.write(f"Number of events: {len(preprocessor.df)}\n")
+            f.write(f"Unique activities: {preprocessor.df['concept:name'].nunique()}\n")
+            if train_outcome:
+                f.write(f"Outcome classes: {len(preprocessor.outcome_encoder.classes_)}\n")
+            if train_lstm:
+                f.write(f"Activity vocabulary size: {len(preprocessor.activity_encoder.classes_)}\n")
+
+        _load_event_log(file_path)
+
+        return JsonResponse({
+            'status': 'ok',
+            'xes_path': file_path,
+            'models_dir': output_dir,
+            'trained': {
+                'outcome': train_outcome,
+                'lstm_torch': train_lstm
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 # URL patterns (to be used in urls.py)

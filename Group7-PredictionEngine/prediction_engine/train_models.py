@@ -7,13 +7,14 @@ import os
 import sys
 import argparse
 from datetime import datetime
+import torch
 
 # Add current directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from data_preprocessing import XESDataPreprocessor
 from outcome_prediction import EnsembleOutcomePredictor
-from lstm_models import CombinedLSTMPredictor
+from torch_models import TorchCombinedPredictor
 
 
 def train_all_models(xes_file_path: str, output_dir: str, 
@@ -73,34 +74,35 @@ def train_all_models(xes_file_path: str, output_dir: str,
         ensemble_dir = os.path.join(output_dir, 'ensemble')
         ensemble.save(ensemble_dir)
     
-    # Phase 2: LSTM Models
+    # Phase 2: LSTM Models (PyTorch + GPU)
     if not outcome_only:
         print("\n" + "="*80)
-        print("STEP 3: TRAINING LSTM MODELS (PHASE 2)")
+        print("STEP 3: TRAINING LSTM MODELS (PHASE 2) [PYTORCH]")
         print("="*80)
-        
-        lstm_data = preprocessor.prepare_sequence_data_for_lstm(max_case_length=50)
-        
-        # Train LSTM models
-        lstm_predictor = CombinedLSTMPredictor(
-            vocab_size=lstm_data['vocab_size'],
-            max_length=lstm_data['max_length']
+
+        lstm_data = preprocessor.build_torch_dataloader_for_lstm(
+            max_case_length=50,
+            batch_size=512,   # شروع با 512؛ اگر OOM شد 256
+            time_mode="log1p",
+            num_workers=0
         )
-        
-        print("\n🔧 Model Improvements Active:")
-        print("  ✓ Focal Loss (better for imbalanced data)")
-        print("  ✓ Larger model (embedding_dim=128, lstm_units=256)")
-        print("  ✓ Longer patience (20 epochs)")
-        print("  ✓ More training epochs (50)")
-        
-        lstm_predictor.train(lstm_data, epochs=50, batch_size=64)
-        
-        # Evaluate
-        lstm_predictor.evaluate(lstm_data)
-        
-        # Save
-        lstm_dir = os.path.join(output_dir, 'lstm')
-        lstm_predictor.save(lstm_dir)
+
+        predictor = TorchCombinedPredictor(
+            vocab_size=lstm_data["vocab_size"],
+            pad_id=lstm_data["pad_id"]
+        )
+
+        print("\nDevice:", predictor.device)
+        if predictor.device == "cuda":
+            print("CUDA GPU:", torch.cuda.get_device_name(0))
+            print("CUDA arch list:", torch.cuda.get_arch_list())
+
+        predictor.train_next(lstm_data["loader"], epochs=5, lr=1e-3)
+        predictor.train_time(lstm_data["loader"], epochs=5, lr=1e-3)
+
+        lstm_dir = os.path.join(output_dir, 'lstm_torch')
+        predictor.save(lstm_dir)
+
     
     # Save preprocessor
     print("\n" + "="*80)

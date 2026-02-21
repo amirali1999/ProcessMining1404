@@ -153,25 +153,20 @@ class NextActivityLSTM:
         )(input_layer)
         
         # Bidirectional LSTM layers for better context
-        lstm1 = layers.Bidirectional(
-            layers.LSTM(
-                self.lstm_units,
-                return_sequences=True,
-                dropout=0.3,
-                recurrent_dropout=0.2,
-                name='lstm_1'
-            ),
-            name='bidirectional_1'
+        lstm1 = layers.LSTM(
+            self.lstm_units,
+            return_sequences=True,
+            dropout=0.2,
+            recurrent_dropout=0.0,  # IMPORTANT: keep 0 for fast GPU kernels
+            name='lstm_1'
         )(embedding)
         
-        lstm2 = layers.Bidirectional(
-            layers.LSTM(
-                self.lstm_units // 2,
-                dropout=0.3,
-                recurrent_dropout=0.2,
-                name='lstm_2'
-            ),
-            name='bidirectional_2'
+        lstm2 = layers.LSTM(
+            self.lstm_units // 2,
+            return_sequences=False,
+            dropout=0.2,
+            recurrent_dropout=0.0,  # IMPORTANT
+            name='lstm_2'
         )(lstm1)
         
         # Dense layers with stronger dropout for regularization
@@ -434,14 +429,14 @@ class RemainingTimeLSTM:
             self.lstm_units,
             return_sequences=True,
             dropout=0.2,
-            recurrent_dropout=0.2,
+            recurrent_dropout=0.0,   # was 0.2
             name='lstm_1'
         )(embedding)
         
         lstm2 = layers.LSTM(
             self.lstm_units // 2,
             dropout=0.2,
-            recurrent_dropout=0.2,
+            recurrent_dropout=0.0,   # was 0.2
             name='lstm_2'
         )(lstm1)
         
@@ -644,8 +639,18 @@ class CombinedLSTMPredictor:
     
     def __init__(self, vocab_size: int, max_length: int):
         """Initialize both models"""
-        self.next_activity_model = NextActivityLSTM(vocab_size, max_length)
-        self.remaining_time_model = RemainingTimeLSTM(vocab_size, max_length)
+        # self.next_activity_model = NextActivityLSTM(vocab_size, max_length)
+        # self.remaining_time_model = RemainingTimeLSTM(vocab_size, max_length)
+        self.next_activity_model = NextActivityLSTM(
+            vocab_size, max_length,
+            embedding_dim=64,
+            lstm_units=128
+        )
+        self.remaining_time_model = RemainingTimeLSTM(
+            vocab_size, max_length,
+            embedding_dim=32,
+            lstm_units=96
+        )   
         self.is_trained = False
     
     def train(self, data_dict, epochs=50, batch_size=64):
@@ -747,3 +752,16 @@ class CombinedLSTMPredictor:
         
         self.is_trained = True
         print(f"Combined models loaded from {directory}")
+
+    def train_from_dataset(self, ds, epochs=10):
+        """
+        ds yields: (x_seq, y_next, y_time)
+        """
+
+        ds_next = ds.map(lambda x, y_next, y_time: (x, y_next))
+        ds_time = ds.map(lambda x, y_next, y_time: (x, y_time))
+
+        self.next_activity_model.model.fit(ds_next, epochs=epochs)
+        self.remaining_time_model.model.fit(ds_time, epochs=epochs)
+
+        self.is_trained = True

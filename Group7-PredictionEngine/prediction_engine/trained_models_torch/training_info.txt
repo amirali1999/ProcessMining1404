@@ -1,0 +1,6 @@
+Training completed at: 2026-02-15 17:22:53.601931
+XES file: C:\University\term9\ProcessMining\Group7-PredictionEngine\dataset\Hospital Billing - Event Log.xes.gz
+Number of cases: 100000
+Number of events: 451255
+Unique activities: 18
+Activity vocabulary size: 20

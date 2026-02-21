@@ -4,6 +4,7 @@ FROM python:3.10-slim
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV PREDICTION_BACKEND=torch
 
 # Set work directory
 WORKDIR /app
@@ -12,6 +13,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     build-essential \
     graphviz \
+    libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies
