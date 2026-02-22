@@ -22,7 +22,7 @@
 
 > تصویر نمونه از داشبورد نظارتی:
 
-![Dashboard Overview](docs/dashboard_overview.png)
+![Dashboard Overview](docs/Screenshot 1404-12-03 at 11.06.09.png)
 > تصویر صفحه آپلود و بررسی تطابق:
 
 ![Dashboard Overview](docs/comformance_runner.png)
